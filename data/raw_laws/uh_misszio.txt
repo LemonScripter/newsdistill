@@ -1,0 +1,11 @@
+FORRÁS: uh.ro Misszió és Alapelvek
+KATEGÓRIA: Belső Szabályzat (Inkonzisztencia ellenőrzéshez)
+
+ALAPELVEK:
+1. Hitelesség és Függetlenség: Az uh.ro célja, hogy hitelesen és szabadon mesélje el a történeteket, politikai és gazdasági befolyástól mentesen.
+2. Közösségi Szolgálat: "Hangot adni azoknak, akiknek nincs." A portál a helyi közösség érdekeit szolgálja, nem hatalmi érdekeket.
+3. Tényalapú Újságírás: A "tényfeltárás" kulcsszó a szerzői profilokban arra utal, hogy az oldal elkötelezett a valóság feltárása mellett, szemben a puszta véleményvezérléssel.
+4. Átláthatóság: Az olvasókkal szembeni korrektség megköveteli, hogy ami reklám vagy vélemény, az annak is legyen jelölve.
+
+AUDIT SZEMPONT:
+Ha egy cikk az uh.ro-n manipulatív, egyoldalú, vagy bizonyítatlan pletykát közöl, az nemcsak etikai vétség, hanem "Saját Misszió Elleni Vétség" (Inkonzisztencia). A "botrány" kulcsszó a szerzőknél a témaválasztásra vonatkozhat (leleplezés), de nem mentesít a hitelességi követelmények alól.

@@ -9,3 +9,6 @@ node_modules/
 
 # Project status documentation
 project_status.md
+
+# Backup directory
+backup/

@@ -1,0 +1,22 @@
+FORRÁS: Codul Civil (Román Polgári Törvénykönyv)
+KATEGÓRIA: Személyiségi jogok és Felelősség
+
+Art. 70 - Dreptul la libera exprimare
+(1) Orice persoană are dreptul la libera exprimare.
+(2) Exercitarea acestui drept nu poate fi restrânsă decât în cazurile prevăzute la art. 75.
+
+Art. 72 - Dreptul la demnitate
+(1) Orice persoană are dreptul la respectarea demnității sale.
+(2) Este interzisă orice atingere adusă onoarei și reputației unei persoane fără consimțământul acesteia.
+
+Art. 73 - Dreptul la propria imagine
+(1) Orice persoană are dreptul la propria imagine.
+(2) Interzicerea reproducerii înfățișării fizice fără acord.
+
+Art. 75 - Limitele (A mérlegelés szabálya)
+(1) Nem minősül jogsértésnek, ha a közlés a törvényi keretek között marad, vagy jóhiszeműen gyakorolják a jogokat.
+(2) A közérdekű tájékoztatás elsőbbséget élvezhet, de csak arányosan.
+
+Art. 1349 - Răspunderea delictuală (Kártérítési felelősség)
+(1) Aki másnak jogellenesen kárt okoz (pl. rágalmazással), köteles azt megtéríteni.
+(2) Az újságíró felelőssége fennáll, ha nem ellenőrizte a tényeket (hiányzó "good faith").

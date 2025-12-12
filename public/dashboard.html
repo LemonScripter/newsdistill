@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Médiaetikai elemzés - Vezérlőpult</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; }
+        .gauge-circle { transition: stroke-dashoffset 1s ease-in-out; }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="text-gray-800 flex flex-col min-h-screen">
+
+    <div id="loading-overlay" class="fixed inset-0 bg-white/95 backdrop-blur z-50 flex flex-col items-center justify-center hidden">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mb-6"></div>
+        <h2 class="text-2xl font-bold text-gray-800 animate-pulse">AI elemzés folyamatban...</h2>
+        <p class="text-gray-500 mt-2" id="loading-status">Törvényszéki audit protokoll futtatása...</p>
+    </div>
+
+    <div class="max-w-4xl mx-auto p-4 md:p-6 w-full flex-grow" id="main-content">
+        
+        <div class="mb-6">
+            <a href="index.html" class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Vissza a címlapra
+            </a>
+        </div>
+
+        <header class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                    <i data-lucide="shield-alert" class="w-8 h-8 text-blue-600"></i>
+                    AI médiaetikai elemzés
+                </h1>
+                <p class="text-sm text-gray-500 mt-1">Forrás: <a href="#" target="_blank" class="text-blue-500 hover:underline text-xs truncate max-w-md inline-block align-bottom" id="url-link">Betöltés...</a></p>
+            </div>
+            <div class="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200">
+                <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">Kockázat:</span>
+                <span id="risk-badge" class="font-bold text-sm px-2 py-0.5 rounded bg-gray-100 text-gray-500">...</span>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col items-center justify-center relative overflow-hidden">
+                <h3 class="text-sm font-medium text-gray-500 mb-4 uppercase tracking-wide">Objektivitási index</h3>
+                <div class="relative w-32 h-32">
+                    <svg class="w-full h-full" viewBox="0 0 100 100">
+                        <circle class="text-gray-100 stroke-current" stroke-width="8" cx="50" cy="50" r="40" fill="transparent"></circle>
+                        <circle id="score-circle" class="text-blue-600 stroke-current gauge-circle" stroke-width="8" stroke-linecap="round" cx="50" cy="50" r="40" fill="transparent" stroke-dasharray="251.2" stroke-dashoffset="251.2" transform="rotate(-90 50 50)"></circle>
+                    </svg>
+                    <div class="absolute top-0 left-0 w-full h-full flex items-center justify-center flex-col">
+                        <span id="score-value" class="text-3xl font-bold text-gray-900">--</span>
+                        <span class="text-xs text-gray-400">/ 100</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-1 md:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col justify-center">
+                <h3 class="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wide flex items-center gap-2">
+                    <i data-lucide="file-text" class="w-4 h-4"></i> Összesített jogi vélemény
+                </h3>
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                    <p id="verdict-text" class="text-gray-700 leading-relaxed font-medium">Betöltés...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-center mb-6">
+            <div class="bg-gray-200 p-1 rounded-lg inline-flex flex-wrap justify-center gap-1 shadow-inner">
+                <button onclick="setTab('analysis')" id="btn-analysis" class="px-5 py-2 rounded-md text-sm font-medium transition-all bg-white text-gray-900 shadow-sm flex items-center gap-2"><i data-lucide="alert-triangle" class="w-4 h-4"></i> Hibák</button>
+                <button onclick="setTab('legal')" id="btn-legal" class="px-5 py-2 rounded-md text-sm font-medium transition-all text-gray-500 hover:text-gray-900 flex items-center gap-2"><i data-lucide="gavel" class="w-4 h-4"></i> Törvénytár</button>
+                <button onclick="setTab('rewrite')" id="btn-rewrite" class="px-5 py-2 rounded-md text-sm font-medium transition-all text-gray-500 hover:text-gray-900 flex items-center gap-2"><i data-lucide="wand-2" class="w-4 h-4"></i> Javított</button>
+            </div>
+        </div>
+
+        <div id="tab-analysis" class="space-y-6 fade-in"><div id="flags-container" class="space-y-4"></div></div>
+        
+        <div id="tab-rewrite" class="hidden fade-in">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-green-50 px-6 py-4 border-b border-green-100 flex justify-between items-center">
+                    <h3 class="text-green-800 font-semibold flex items-center gap-2"><i data-lucide="check-circle-2" class="w-5 h-5"></i> Semlegesített verzió</h3>
+                </div>
+                <div class="p-8">
+                    <h1 id="neutral-headline" class="text-2xl font-bold text-gray-900 mb-6 leading-tight"></h1>
+                    <div id="neutral-body" class="prose prose-blue max-w-none text-gray-700 leading-relaxed text-justify"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-legal" class="hidden space-y-6 fade-in">
+             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                    <h3 class="font-semibold text-gray-700 flex items-center gap-2"><i data-lucide="book" class="w-4 h-4"></i> Részletes jogi audit (Csak törvények)</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-gray-100 text-gray-600 uppercase font-bold text-xs">
+                            <tr>
+                                <th class="px-6 py-3">Súlyosság</th>
+                                <th class="px-6 py-3 w-1/3">Kifogásolt részlet</th>
+                                <th class="px-6 py-3">Megsértett szabály</th>
+                                <th class="px-6 py-3">Hivatalos jogi hivatkozás</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100" id="legal-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-12 bg-white border-t border-gray-100 py-8 w-full">
+        <div class="max-w-6xl mx-auto px-6 text-center">
+            <p class="text-gray-600 font-semibold mb-2">Citrom Média Kft. - Szőke László</p>
+            <p class="text-xs text-gray-400">&copy; 2025 NewsDistill Engine. Minden jog fenntartva.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- 1. JOGI HIVATKOZÁSOK (A PONTOS, HIVATALOS NEVEK) ---
+        // Ez írja felül a "Mure 1"-et "MÚRE Etikai Kódex 1. cikkely"-re
+        const legalCitations = {
+            "RULE_DEFAMATION": "Codul Civil, Art. 72 (Dreptul la demnitate)",
+            "RULE_PRESUMPTION": "Constituția României, Art. 23 (11) (Prezumția de nevinovăție)",
+            "RULE_HATE_SPEECH": "Codul Penal, Art. 369 (Incitarea la ură)",
+            "RULE_PRIVACY": "EU GDPR Art. 85 / Codul Civil Art. 71",
+            "RULE_OPINION_MIX": "MÚRE Etikai Kódex, 2.2. cikkely",
+            "RULE_VERIFICATION": "MÚRE Etikai Kódex, 2.3. cikkely (Forrásellenőrzés)",
+            "RULE_FAKE_NEWS": "Constituția României, Art. 31 (4) (Korrekt tájékoztatás)",
+            
+            "RULE_IMPARTIALITY": "BBC Editorial Guidelines, Section 4 (Impartiality)",
+            "RULE_BBC_IMPAR_1": "BBC Editorial Guidelines, Section 4 (Impartiality)",
+            "RULE_IMPAR_1": "BBC Editorial Guidelines, Section 4 (Impartiality)",
+            
+            "RULE_MURE_1": "MÚRE Etikai Kódex, 1. cikkely (Szólásszabadság felelősséggel)",
+            "RULE_MURE_2": "MÚRE Etikai Kódex, 2. cikkely (Tények tisztelete)",
+            "RULE_MURE_2_2": "MÚRE Etikai Kódex, 2.2. cikkely (Hír/Vélemény)",
+            "RULE_MURE_5": "MÚRE Etikai Kódex, 5. cikkely (Helyreigazítás)",
+            
+            "RULE_REPL_7": "CJI Cod Deontologic (A válaszadás joga)",
+            "RULE_REPLY": "CJI Cod Deontologic (A válaszadás joga)",
+            
+            "RULE_RO_CIVIL_72_1349": "Codul Civil, Art. 72 és 1349",
+            "RULE_RO_PENAL_369": "Codul Penal, Art. 369",
+            "RULE_UH_MISSION_CONSISTENCY": "uh.ro Misszió Nyilatkozat (Hitelesség)"
+        };
+
+        // --- 2. SZABÁLY NEVEK (EMBERI NYELVEN) ---
+        const ruleTranslations = {
+            "RULE_DEFAMATION": "Rágalmazás / jóhírnév megsértése",
+            "RULE_PRESUMPTION": "Ártatlanság vélelmének sérelme",
+            "RULE_HATE_SPEECH": "Gyűlöletbeszéd / uszítás",
+            "RULE_PRIVACY": "Magánszféra megsértése",
+            "RULE_OPINION_MIX": "Véleménykeveredés (manipuláció)",
+            "RULE_VERIFICATION": "Forráshiány / ellenőrizetlen állítás",
+            "RULE_FAKE_NEWS": "Dezinformáció gyanú",
+            
+            // Az "AI hülyeségei" ellen:
+            "RULE_MURE_1": "Szakmai felelősség hiánya",
+            "RULE_MURE_2": "Tények tiszteletének hiánya",
+            "RULE_MURE_2_2": "Hír és vélemény keveredése",
+            "RULE_MURE_5": "Válaszadási jog megtagadása",
+            "MURE_1": "Szakmai felelősség hiánya",
+            "MURE_2": "Tények tiszteletének hiánya",
+            "MURE_5": "Válaszadási jog megtagadása",
+            "IMPAR_1": "Elfogultság (BBC sztenderd)",
+            
+            "RULE_IMPARTIALITY": "Elfogultság / egyoldalúság",
+            "RULE_REPL_7": "Válaszadási jog hiánya",
+            "RULE_UH_MISSION_CONSISTENCY": "uh.ro Misszió megsértése",
+            "FALLBACK": "Általános etikai észrevétel"
+        };
+
+        const riskTranslations = { "LOW": "ALACSONY", "MEDIUM": "KÖZEPES", "HIGH": "MAGAS", "CRITICAL": "KRITIKUS", "ERROR": "HIBA" };
+
+        lucide.createIcons();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetUrl = urlParams.get('url');
+            if (targetUrl) initDashboard(targetUrl);
+            else window.location.href = 'index.html';
+        });
+
+        async function initDashboard(url) {
+            document.getElementById('url-link').textContent = url;
+            document.getElementById('url-link').href = url;
+            document.getElementById('loading-overlay').classList.remove('hidden'); 
+            try {
+                const response = await fetch('/.netlify/functions/analyze', {
+                    method: 'POST', body: JSON.stringify({ url: url }), headers: { 'Content-Type': 'application/json' }
+                });
+                if (!response.ok) throw new Error("Szerver hiba");
+                const data = await response.json();
+                renderDashboard(data);
+            } catch (error) { renderErrorState(error.message); } 
+            finally { document.getElementById('loading-overlay').classList.add('hidden'); }
+        }
+
+        function renderErrorState(msg) {
+            const meta = { risk_level: "ERROR", objectivity_score: 0, verdict_summary: `Hiba: ${msg}` };
+            renderDashboard({ ui_meta: meta, flags: [], rewritten_article: null });
+        }
+
+        // Kódtisztító
+        function cleanText(text) {
+            if (!text) return "";
+            return text.replace(/(RULE_[A-Z0-9_]+|Mure \d+|Impar \d+)/g, (match) => {
+                return ruleTranslations[match] || ruleTranslations["RULE_" + match.replace(" ", "_").toUpperCase()] || match;
+            });
+        }
+
+        function renderDashboard(data) {
+            const meta = data.ui_meta || {};
+            const flags = data.flags || [];
+
+            const riskEl = document.getElementById('risk-badge');
+            riskEl.textContent = riskTranslations[meta.risk_level] || meta.risk_level;
+            
+            let riskClass = 'bg-gray-100 text-gray-600';
+            if (['HIGH', 'CRITICAL'].includes(meta.risk_level)) riskClass = 'bg-red-100 text-red-700 border border-red-200';
+            else if (meta.risk_level === 'MEDIUM') riskClass = 'bg-yellow-100 text-yellow-700 border border-yellow-200';
+            else if (meta.risk_level === 'LOW') riskClass = 'bg-green-100 text-green-700 border border-green-200';
+            else if (meta.risk_level === 'ERROR') riskClass = 'bg-gray-800 text-white border border-gray-900';
+            
+            riskEl.className = `font-bold text-sm px-3 py-1 rounded shadow-sm ${riskClass}`;
+
+            document.getElementById('score-value').textContent = meta.objectivity_score;
+            document.getElementById('verdict-text').textContent = cleanText(meta.verdict_summary);
+
+            const circle = document.getElementById('score-circle');
+            const circumference = 251.2;
+            const offset = circumference - (meta.objectivity_score / 100) * circumference;
+            circle.style.strokeDashoffset = offset;
+            
+            circle.classList.remove('text-blue-600', 'text-red-500', 'text-yellow-500', 'text-green-500', 'text-gray-300');
+            if (meta.risk_level === 'ERROR') circle.classList.add('text-gray-300');
+            else if(meta.objectivity_score < 50) circle.classList.add('text-red-500');
+            else if(meta.objectivity_score < 80) circle.classList.add('text-yellow-500');
+            else circle.classList.add('text-green-500');
+
+            const flagsContainer = document.getElementById('flags-container');
+            const legalTableBody = document.getElementById('legal-table-body');
+            flagsContainer.innerHTML = '';
+            legalTableBody.innerHTML = '';
+
+            if (meta.risk_level === 'ERROR') {
+                 flagsContainer.innerHTML = `<div class="p-8 text-center bg-red-50 rounded-xl border border-red-100"><h3 class="text-xl font-bold text-gray-900">Hiba történt</h3><p>${meta.verdict_summary}</p></div>`;
+                 return;
+            }
+
+            if (flags.length === 0) {
+                 flagsContainer.innerHTML = `<div class="p-8 text-center bg-green-50 rounded-xl border border-green-100"><h3 class="text-xl font-bold text-green-900">Tiszta cikk! ✅</h3></div>`;
+            }
+
+            flags.forEach(flag => {
+                const isRed = ['RED', 'CRITICAL', 'HIGH'].includes((flag.severity || "").toUpperCase());
+                
+                // FORDÍTÁS
+                let rawId = flag.violation_id || "Ismeretlen";
+                let lookupKey = rawId; 
+                if(!ruleTranslations[lookupKey]) {
+                     lookupKey = rawId.toUpperCase().replace(" ", "_");
+                     if(!ruleTranslations[lookupKey]) lookupKey = "RULE_" + lookupKey;
+                }
+                let translatedId = ruleTranslations[lookupKey];
+                if (!translatedId) {
+                    const rawText = rawId.replace('RULE_', '').replace(/_/g, ' ').toLowerCase();
+                    translatedId = rawText.charAt(0).toUpperCase() + rawText.slice(1);
+                }
+
+                // JOGALAP (Csak akkor mutatjuk, ha nem ID)
+                let officialLaw = legalCitations[flag.violation_id];
+                let displayLaw = officialLaw;
+                
+                if (!displayLaw) {
+                    let aiLaw = flag.law_reference || "Ismeretlen forrás";
+                    if (aiLaw.includes("RULE_") || aiLaw === flag.violation_id) {
+                        displayLaw = "Szakmai/Etikai norma";
+                    } else {
+                        displayLaw = aiLaw;
+                    }
+                }
+
+                const cleanedExplanation = cleanText(flag.explanation);
+
+                // --- 1. HIBÁK KÁRTYA (Minden megjelenik) ---
+                const card = document.createElement('div');
+                card.className = `bg-white rounded-lg shadow-sm border-l-4 p-5 transition hover:shadow-md ${isRed ? 'border-red-500' : 'border-yellow-400'}`;
+                
+                // Kiemeljük, ha ez UH Misszió sértés!
+                let extraBadge = "";
+                if (flag.violation_id === "RULE_UH_MISSION_CONSISTENCY") {
+                    extraBadge = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 ml-2">UH MISSZIÓ SÉRTÉS</span>`;
+                }
+
+                card.innerHTML = `
+                    <div class="flex items-start gap-4">
+                        <div class="shrink-0 mt-1"><i data-lucide="alert-circle" class="w-6 h-6 ${isRed ? 'text-red-500' : 'text-yellow-500'}"></i></div>
+                        <div class="flex-1">
+                            <div class="flex flex-wrap items-center gap-2 mb-2">
+                                <span class="text-xs font-bold px-2 py-0.5 rounded bg-gray-100 text-gray-800 border border-gray-200">${translatedId}</span>
+                                ${isRed ? '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-700">SÚLYOS</span>' : ''}
+                                ${extraBadge}
+                            </div>
+                            <div class="bg-slate-50 border-l-2 border-slate-300 p-3 mb-3 italic text-sm text-slate-700">"${flag.original_segment || 'N/A'}"</div>
+                            <p class="text-sm font-semibold text-gray-900 mb-1">Audit indoklás:</p>
+                            <p class="text-sm text-gray-600 leading-relaxed">${cleanedExplanation}</p>
+                            <div class="mt-3 flex items-center gap-1 text-xs text-purple-600 font-mono bg-purple-50 inline-block px-2 py-1 rounded">
+                                <i data-lucide="scale" class="w-3 h-3"></i> § ${displayLaw}
+                            </div>
+                        </div>
+                    </div>`;
+                flagsContainer.appendChild(card);
+
+                // --- 2. TÖRVÉNYTÁR LISTA (Csak ha tényleg Törvény!) ---
+                // Szűrjük ki az etikai dolgokat, csak a kemény jog maradjon
+                const isHardLaw = displayLaw.includes("Art.") || displayLaw.includes("Codul") || displayLaw.includes("GDPR") || displayLaw.includes("Constituția");
+                
+                if (isHardLaw) {
+                    const row = document.createElement('tr');
+                    row.className = "hover:bg-gray-50 border-b border-gray-50";
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-xs font-bold ${isRed ? 'text-red-700' : 'text-yellow-600'}">${isRed ? 'MAGAS' : 'KÖZEPES'}</td>
+                        <td class="px-6 py-4 italic text-gray-600 text-sm break-words min-w-[200px]">"${flag.original_segment ? flag.original_segment.substring(0, 80) + '...' : ''}"</td>
+                        <td class="px-6 py-4 text-xs font-bold text-gray-700">${translatedId}</td>
+                        <td class="px-6 py-4 text-xs font-mono text-purple-600">${displayLaw}</td>
+                    `;
+                    legalTableBody.appendChild(row);
+                }
+            });
+            
+            // Ha nincs törvénysértés, írjuk ki a táblázatba is
+            if (legalTableBody.innerHTML === "") {
+                 legalTableBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-500 italic">Nincs azonosított törvénysértés (csak etikai vétségek lehetnek).</td></tr>`;
+            }
+
+            if (meta.risk_level === 'ERROR') document.getElementById('neutral-body').innerHTML = "<p class='text-gray-400 italic text-center p-4'>Hiba miatt nincs generált tartalom.</p>";
+            else if (data.rewritten_article) {
+                document.getElementById('neutral-headline').textContent = data.rewritten_article.neutral_headline || "Nem sikerült generálni";
+                document.getElementById('neutral-body').innerHTML = data.rewritten_article.neutral_body_html || "<p class='text-gray-400 italic'>Nincs elérhető tartalom.</p>";
+            } else document.getElementById('neutral-body').innerHTML = "<p class='text-gray-400 italic text-center p-4'>Ehhez a cikkhez nem készült javított verzió.</p>";
+
+            lucide.createIcons();
+        }
+
+        function setTab(tabName) {
+            ['analysis', 'rewrite', 'legal'].forEach(t => document.getElementById('tab-' + t).classList.add('hidden'));
+            const activeTab = document.getElementById('tab-' + tabName);
+            activeTab.classList.remove('hidden');
+            activeTab.classList.add('fade-in'); 
+            const btns = ['btn-analysis', 'btn-rewrite', 'btn-legal'];
+            btns.forEach(b => {
+                 const btn = document.getElementById(b);
+                 btn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all bg-white text-gray-500 hover:text-gray-900 border border-transparent";
+            });
+            const activeBtn = document.getElementById('btn-' + tabName);
+            if(tabName === 'legal') activeBtn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all text-purple-700 bg-purple-50 border border-purple-200 shadow-sm";
+            else if (tabName === 'rewrite') activeBtn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all text-green-700 bg-green-50 border border-green-200 shadow-sm";
+            else activeBtn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all text-blue-700 bg-blue-50 border border-blue-200 shadow-sm";
+        }
+    </script>
+</body>
+</html>

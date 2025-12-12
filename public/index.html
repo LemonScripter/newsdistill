@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewsDistill - Médiaetikai Auditor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #ffffff; }
+        .gradient-text { background: linear-gradient(to right, #2563eb, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-pattern { background-color: #f8fafc; background-image: radial-gradient(#e2e8f0 1px, transparent 1px); background-size: 24px 24px; position: relative; }
+    </style>
+</head>
+<body class="text-gray-800 flex flex-col min-h-screen">
+    <nav class="border-b border-gray-100 bg-white/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2"><i data-lucide="shield-check" class="w-6 h-6 text-blue-600"></i><span class="font-bold text-xl tracking-tight text-gray-900">NewsDistill</span></div>
+            <div class="text-sm text-gray-500">v1.0.5 Beta</div>
+        </div>
+    </nav>
+    <section class="hero-pattern py-20 px-6 min-h-[85vh] flex flex-col justify-center">
+        <div class="max-w-4xl mx-auto text-center z-10">
+            <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 mb-6 tracking-tight">Az igazság <span class="gradient-text">objektív</span> mércéje.</h1>
+            <p class="text-lg md:text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">Mesterséges intelligencia alapú médiaetikai és jogi audit rendszer.</p>
+            <div class="max-w-2xl mx-auto bg-white p-2 rounded-xl shadow-xl border border-gray-200 flex flex-col md:flex-row gap-2 transition-all focus-within:ring-4 ring-blue-500/10 focus-within:border-blue-500">
+                <div class="relative flex-1">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-lucide="link" class="h-5 w-5 text-gray-400"></i></div>
+                    <input type="text" id="url-input" class="block w-full pl-10 pr-3 py-4 text-gray-900 placeholder-gray-400 bg-transparent border-none focus:ring-0 text-base" placeholder="Másold be a vizsgálandó cikk teljes linkjét!" value="">
+                </div>
+                <button onclick="startAnalysis()" id="analyze-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg"><span>Elemzés indítása</span><i data-lucide="arrow-right" class="w-4 h-4"></i></button>
+            </div>
+            <p class="mt-4 text-xs text-gray-400">Támogatott forrás: uh.ro | Elemzési idő: ~5-30 másodperc</p>
+        </div>
+        <div class="absolute bottom-0 left-0 w-full flex justify-center pb-8 opacity-30 animate-bounce pointer-events-none">
+            <div class="flex gap-8 md:gap-16"><i data-lucide="chevron-down" class="w-8 h-8 text-gray-500"></i></div>
+        </div>
+    </section>
+    <section class="py-16 bg-slate-50 border-t border-slate-200">
+        <div class="max-w-4xl mx-auto px-6">
+            <h3 class="text-center font-bold text-gray-800 mb-8 uppercase tracking-wider text-sm">Ellenőrzött források és adatbázisok</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <span class="bg-white p-4 rounded shadow-sm text-sm font-semibold text-slate-600">Codul Civil</span>
+                <span class="bg-white p-4 rounded shadow-sm text-sm font-semibold text-slate-600">Codul Penal</span>
+                <span class="bg-white p-4 rounded shadow-sm text-sm font-semibold text-slate-600">MÚRE Kódex</span>
+                <span class="bg-white p-4 rounded shadow-sm text-sm font-semibold text-slate-600">uh.ro Misszió</span>
+            </div>
+        </div>
+    </section>
+    <footer class="mt-auto bg-white border-t border-gray-100 py-8">
+        <div class="max-w-6xl mx-auto px-6 text-center">
+            <p class="text-gray-600 font-semibold mb-2">Citrom Média Kft. - Szőke László</p>
+            <p class="text-xs text-gray-400">&copy; 2025 NewsDistill Engine. Minden jog fenntartva.</p>
+        </div>
+    </footer>
+    <div id="loading-overlay" class="fixed inset-0 bg-white/90 backdrop-blur-sm z-50 hidden flex flex-col items-center justify-center">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mb-4"></div>
+        <h3 class="text-xl font-bold text-gray-900">A cikk átvilágítása folyamatban...</h3>
+        <p class="text-gray-500 mt-2" id="loading-text">Jogi adatbázisok betöltése...</p>
+    </div>
+    <script>
+        lucide.createIcons();
+        function startAnalysis() {
+            const url = document.getElementById('url-input').value;
+            const overlay = document.getElementById('loading-overlay');
+            const statusText = document.getElementById('loading-text');
+            if (!url) { alert('Kérjük, adjon meg egy URL-t!'); return; }
+            overlay.classList.remove('hidden');
+            setTimeout(() => { statusText.textContent = "Szemantikai elemzés és tényellenőrzés..."; }, 1000);
+            setTimeout(() => { statusText.textContent = "Összevetés a román jogszabályokkal (Cod Civil)..."; }, 3000);
+            setTimeout(() => { statusText.textContent = "Etikai és küldetés-rezonancia vizsgálat..."; }, 6000);
+            setTimeout(() => {
+                const encodedUrl = encodeURIComponent(url);
+                window.location.href = `dashboard.html?url=${encodedUrl}`;
+            }, 500);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+FORRÁS: Constituția României (Románia Alkotmánya)
+KATEGÓRIA: Alapjogok és Sajtószabadság
+
+ARTICOLUL 23 - Libertatea individuală (Ártatlanság vélelme)
+(11) Până la rămânerea definitivă a hotărârii judecătorești de condamnare, persoana este considerată nevinovată.
+*Relevancia:* Bűnügyi tudósításoknál kötelező.
+
+ARTICOLUL 26 - Viața intimă, familială și privată (Magánszféra)
+(1) Autoritățile publice respectă și ocrotesc viața intimă, familială și privată.
+(2) Persoana fizică are dreptul să dispună de ea însăși, dacă nu încalcă drepturile și libertățile altora, ordinea publică sau bunele moravuri.
+*Relevancia:* Paparazzi fotók, engedély nélküli felvételek, magánéleti pletykák.
+
+ARTICOLUL 30 - Libertatea de exprimare (Szólásszabadság és korlátai)
+(1) Libertatea de exprimare a gândurilor, a opiniilor sau a credințelor... este inviolabilă.
+(2) Cenzura de orice fel este interzisă.
+(6) Libertatea de exprimare nu poate prejudicia demnitatea, onoarea, viața particulară a persoanei și nici dreptul la propria imagine.
+(7) Sunt interzise de lege defăimarea țării și a națiunii, îndemnul la război de agresiune, la ură națională, rasială, de clasă sau religioasă, incitarea la discriminare, la separatism teritorial sau la violență publică.
+(8) Răspunderea civilă pentru informația sau creația adusă la cunoștință publică revine editorului sau realizatorului...
+*Relevancia:* Ez a sajtóperek "Bibliája". A (6)-os és (7)-es bekezdés a legfontosabb trigger a gyűlöletbeszéd és rágalmazás szűrésére.
+
+ARTICOLUL 31 - Dreptul la informație (A tájékozódáshoz való jog vs. Fake News)
+(1) Dreptul persoanei de a avea acces la orice informație de interes public nu poate fi îngrădit.
+(4) Mijloacele de informare în masă, publice și private, sunt obligate să asigure informarea corectă a opiniei publice.
+*Relevancia:* Ez a legfontosabb fegyvered a DEZINFORMÁCIÓ ellen. Ha egy cikk hazudik vagy ferdít, az Alkotmány 31. cikkének (4) bekezdését sérti ("informarea corectă").
