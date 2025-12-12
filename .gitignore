@@ -1,0 +1,11 @@
+# Node.js dependencies
+node_modules/
+
+# Netlify generated files
+.netlify/
+
+# Environment variables
+.env
+
+# Project status documentation
+project_status.md
