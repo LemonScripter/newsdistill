@@ -1,5 +1,14 @@
 [
   {
+    "id": "META_INFO",
+    "category": "META",
+    "severity": "LOW",
+    "description": "Adatbázis verziókövetés",
+    "trigger_logic": "N/A",
+    "last_verified": "2025-12-14",
+    "sources": []
+  },
+  {
     "id": "RULE_LEGAL_DEFAMATION",
     "category": "JOGI",
     "severity": "HIGH",

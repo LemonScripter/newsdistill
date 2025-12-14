@@ -153,6 +153,13 @@ async function callAIProvider(providerConfig, prompt, systemPrompt) {
 }
 
 exports.handler = async (event, context) => {
+    // DEBUG: Kulcsok ellenőrzése (csak az első 5 karakter)
+    console.log("--- API KULCS DIAGNOSZTIKA ---");
+    console.log("GEMINI:", process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.substring(0, 5) + "..." : "NINCS MEGADVA");
+    console.log("GROQ:", process.env.GROQ_API_KEY ? process.env.GROQ_API_KEY.substring(0, 5) + "..." : "NINCS MEGADVA");
+    console.log("OPENAI:", process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.substring(0, 5) + "..." : "NINCS MEGADVA");
+    console.log("------------------------------");
+
     // Globális timeout védelem (26s - Netlify limit)
     const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Global Timeout (26s)")), 26000));
 
@@ -168,11 +175,14 @@ exports.handler = async (event, context) => {
 
             // --- 1. SZABÁLYSZŰRÉS ÉS BIZTONSÁGI BESZÚRÁS ---
             
-            // a) Alap szűrés: Alapértelmezetten kivesszük a "BELSŐ" kategóriájú (pl. uh.ro misszió) szabályokat
-            // Hogy ne zavarjanak más portálok elemzésénél.
-            let activeMatrix = fullLegalMatrix.filter(rule => rule.category !== 'BELSŐ');
+            // a) Metaadatok kinyerése (v2 Dynamic DB)
+            const metaObj = fullLegalMatrix.find(r => r.id === 'META_INFO');
+            const dbVersionDate = metaObj ? metaObj.last_verified : "Ismeretlen";
 
-            // b) Ha uh.ro a célpont, akkor VISSZATESSZÜK a BELSŐ szabályt az eredeti listából
+            // b) Alap szűrés: Kivesszük a "BELSŐ" és "META" kategóriájú szabályokat
+            let activeMatrix = fullLegalMatrix.filter(rule => rule.category !== 'BELSŐ' && rule.category !== 'META');
+
+            // c) Ha uh.ro a célpont, akkor VISSZATESSZÜK a BELSŐ szabályt az eredeti listából
             if (targetUrl.includes('uh.ro')) {
                 const missionRule = fullLegalMatrix.find(rule => rule.id === 'RULE_INTERNAL_MISSION');
                 if (missionRule) {
@@ -202,8 +212,9 @@ KÖTELEZŐ INSTRUKCIÓK A JSON KIMENETHEZ:
 3. 'severity': LOW, MEDIUM, HIGH, CRITICAL.
 4. 'explanation': Írd le magyarul az indoklást. FONTOS: Ebben a szövegben SOHA NE HASZNÁLJ KÓDOKAT (pl. RULE_MURE_5)!
 5. Misszió ellenőrzés: Ha 'RULE_INTERNAL_MISSION' sérelmet találsz, azt mindenképp jelezd külön flag-ként!
+6. 'contextual_analysis': Vizsgáld a szövegkörnyezetet! Van benne szarkazmus, irónia vagy "dog whistle" (kódolt politikai üzenet)? Ha igen, írd le röviden magyarul. Ha tiszta/tényszerű, hagyd üresen.
 
-FIGYELEM: A vlaszod KIZÁRÓLAG a nyers JSON objektum legyen!
+FIGYELEM: A válaszod KIZÁRÓLAG a nyers JSON objektum legyen!
 NE írj bevezető szöveget (pl. "Itt van a JSON...").
 NE írj lezáró szöveget.
 NE használj markdown formázást (\`\\\`json).
@@ -216,13 +227,14 @@ KIMENET: Valid JSON.
     "objectivity_score": 0-100,
     "verdict_summary": "Tömör jogi összefoglaló (max 3 mondat)."
   },
+  "contextual_analysis": "Rejtett jelentés leírása vagy üres string",
   "flags": [
     {
-      "violation_id": "Szabály ID (pl. RULE_DEFAMATION)",
+      "violation_id": "Szabály ID",
       "severity": "RED" | "YELLOW",
-      "original_segment": "Közvetlen, szó szerinti idézet a cikkből (max 1 mondat, VÁLTOZATLAN FORMÁBAN)",
-      "explanation": "Indoklás magyarul",
-      "law_reference": "A törvény neve és cikkelye (pl. Cod Civil Art. 72)"
+      "original_segment": "Idézet",
+      "explanation": "Indoklás",
+      "law_reference": "Jogforrás"
     }
   ],
   "rewritten_article": {
@@ -238,7 +250,6 @@ KIMENET: Valid JSON.
             
             const title = $('h1').text().trim() || $('meta[property="og:title"]').attr('content') || "Cím nem található";
             
-            // Bővített szerzőkeresés (több szelektorral)
             const author = 
                 $('meta[name="author"]').attr('content') || 
                 $('meta[property="article:author"]').attr('content') || 
@@ -251,22 +262,16 @@ KIMENET: Valid JSON.
 
             const domain = new URL(targetUrl).hostname.replace('www.', '');
 
-            // Tartalomkeresés fallback logikával
             let content = $('article').text().trim() || $('div.entry-content').text().trim() || $('p').text().trim();
-            
-            // Limitáljuk a hosszt a sebesség érdekében (kb. 25000 karakter - Gemini/GPT-4o elbírja)
             const truncatedContent = content.substring(0, 25000);
             const userPrompt = `CÍM: ${title}\nSZERZŐ: ${author}\n\nTARTALOM (Részlet):\n${truncatedContent}`;
 
-            // --- 3. PÁRHUZAMOS ELEMZÉS ÉS AGGREGÁCIÓ (Consensus Protocol) ---
+            // --- 3. PÁRHUZAMOS ELEMZÉS ÉS AGGREGÁCIÓ (Consensus Protocol v2) ---
             const providers = getProviders();
-            // Csak azokat futtatjuk, amikhez van kulcs. 
-            // Megemeljük a limitet 6-ra, hogy MINDENKI (Gemini, Groq, Mistral, OpenAI, xAI, Perplexity) beleférjen!
             const activeProviders = providers.filter(p => p.key).slice(0, 6);
             
             console.log(`[Consensus] Indítás ${activeProviders.length} modellel: ${activeProviders.map(p => p.name).join(', ')}`);
 
-            // Párhuzamos indítás (Promise.allSettled, hogy ne dőljön be, ha egy hibázik)
             const promises = activeProviders.map(async (provider) => {
                 try {
                     const rawJson = await callAIProvider(provider, userPrompt, SYSTEM_PROMPT);
@@ -284,85 +289,107 @@ KIMENET: Valid JSON.
                 .filter(r => r.status === 'fulfilled' && r.value.success)
                 .map(r => r.value);
 
-            // --- 4. EREDMÉNYEK ÖSSZEFÉSÜLÉSE ---
+            // --- 4. EREDMÉNYEK ÖSSZEFÉSÜLÉSE (v2 Logic) ---
             if (successfulResults.length === 0) {
                 console.error("VÉGZETES: Minden AI elutasította a kérést.");
                 return {
                     statusCode: 200, 
                     body: JSON.stringify({
-                        ui_meta: {
-                            risk_level: "ERROR",
-                            objectivity_score: 0,
-                            verdict_summary: "Nem sikerült az elemzés egyetlen modellel sem. (Ellenőrizd az API kulcsokat!)"
-                        },
+                        ui_meta: { risk_level: "ERROR", objectivity_score: 0, verdict_summary: "Nem sikerült az elemzés egyetlen modellel sem." },
                         flags: [],
                         rewritten_article: null
                     })
                 };
             }
 
-            // Aggregáció logika
             let combinedFlags = [];
             let totalScore = 0;
             let summaries = [];
             let riskLevels = [];
-            // Prioritási sorrend a kockázatokhoz
+            let contextualAnalyses = []; // v2: Kontextus gyűjtő
+
             const riskOrder = { "CRITICAL": 4, "HIGH": 3, "MEDIUM": 2, "LOW": 1 };
             const riskLevelNames = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
 
             successfulResults.forEach(res => {
                 const { provider, data } = res;
                 
-                // 1. Flags: Minden flaghez hozzáadjuk a forrást
+                // Flags
                 if (data.flags && Array.isArray(data.flags)) {
-                    const taggedFlags = data.flags.map(f => ({
-                        ...f,
-                        explanation: `[${provider}] ${f.explanation}` // Megjelöljük, ki mondta
-                    }));
+                    const taggedFlags = data.flags.map(f => ({ ...f, explanation: `[${provider}] ${f.explanation}` }));
                     combinedFlags.push(...taggedFlags);
                 }
 
-                // 2. Score: Átlagoláshoz gyűjtünk
+                // Score
                 totalScore += (data.ui_meta.objectivity_score || 0);
 
-                // 3. Summary: Gyűjtés
+                // Summary
                 summaries.push(`**${provider}:** ${data.ui_meta.verdict_summary}`);
 
-                // 4. Risk: Gyűjtés
-                if (data.ui_meta.risk_level) riskLevels.push(data.ui_meta.risk_level);
+                // Risk
+                if (data.ui_meta.risk_level) riskLevels.push({ provider: provider, level: data.ui_meta.risk_level, value: riskOrder[data.ui_meta.risk_level] || 1 });
+
+                // Context (v2)
+                if (data.contextual_analysis && data.contextual_analysis.length > 5) {
+                    contextualAnalyses.push(`[${provider}]: ${data.contextual_analysis}`);
+                }
             });
 
-            // Végső számítások
-            const avgScore = Math.round(totalScore / successfulResults.length);
-            const finalSummary = summaries.join('\n\n');
+            // v2: Kisebbségi jelentés (Minority Report) Logika
+            // Megkeressük a "Konszenzus" szintet (pl. módusz vagy átlag), és megnézzük, ki tér el felfelé.
             
-            // Legrosszabb kockázat kiválasztása (Worst-case scenario)
-            let maxRiskVal = 0;
-            riskLevels.forEach(r => {
-                if (riskOrder[r] > maxRiskVal) maxRiskVal = riskOrder[r];
-            });
-            const finalRisk = maxRiskVal > 0 ? riskLevelNames[maxRiskVal - 1] : "LOW";
+            // 1. Átlagos pontszám
+            const avgScore = Math.round(totalScore / successfulResults.length);
+            
+            // 2. Legmagasabb kockázat (Safety First) - Ez marad a fő plecsni
+            const maxRiskVal = Math.max(...riskLevels.map(r => r.value));
+            const finalRisk = riskLevelNames[maxRiskVal - 1] || "LOW";
 
-            // Az első sikeres modell rewrite-ját használjuk (egyszerűsítés)
+            // 3. Különvélemény keresés (Dissenting Opinion)
+            // Ha a többség (vagy legalább 1 modell) LOW/MEDIUM, de van HIGH/CRITICAL, az gyanús.
+            // Vagy fordítva: Mindenki CRITICAL, de valaki LOW (bár ez kevésbé veszélyes).
+            // A "Kisebbségi jelentés" akkor érdekes, ha valaki VESZÉLYT jelez, miközben mások nem.
+            
+            let minorityReport = null;
+            const highRiskCount = riskLevels.filter(r => r.value >= 3).length; // HIGH vagy CRITICAL
+            const totalCount = riskLevels.length;
+
+            if (highRiskCount > 0 && highRiskCount < totalCount) {
+                // Van nézeteltérés! Van magas kockázat, de nem mindenki szerint.
+                const dissenters = riskLevels.filter(r => r.value >= 3);
+                const dissenterNames = dissenters.map(d => d.provider).join(', ');
+                minorityReport = {
+                    title: "Kisebbségi jelentés (Kockázat)",
+                    content: `${dissenterNames} magasabb kockázatot (HIGH/CRITICAL) azonosított, míg más modellek enyhébbnek ítélték.`,
+                    dissenters: dissenters
+                };
+            }
+
+            // 4. Kontextuális réteg összefésülése
+            let finalContext = null;
+            if (contextualAnalyses.length > 0) {
+                // Ha legalább 2 modell lát iróniát, vagy 1 modell nagyon hosszan ír róla
+                finalContext = contextualAnalyses.join(' | ');
+            }
+
+            const finalSummary = summaries.join('\n\n');
             const finalRewrite = successfulResults[0].data.rewritten_article;
 
             const finalResult = {
-                metadata: {
-                    title: title,
-                    author: author,
-                    domain: domain,
-                    url: targetUrl
-                },
+                metadata: { title, author, domain, url: targetUrl },
+                db_version_date: dbVersionDate,
                 ui_meta: {
                     risk_level: finalRisk,
                     objectivity_score: avgScore,
                     verdict_summary: finalSummary
                 },
+                minority_report: minorityReport, // v2 Feature
+                contextual_analysis: finalContext, // v2 Feature
                 flags: combinedFlags,
                 rewritten_article: finalRewrite
             };
             
-            console.log(`✅ SIKERES AGGREGÁCIÓ: ${successfulResults.length} modell alapján.`);
+            console.log(`✅ SIKERES AGGREGÁCIÓ (v2): ${successfulResults.length} modell. Minority: ${minorityReport ? 'VAN' : 'NINCS'}`);
             return { statusCode: 200, body: JSON.stringify(finalResult) };
 
         } catch (error) {

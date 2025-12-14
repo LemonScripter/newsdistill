@@ -23,9 +23,9 @@
     </div>
 
     <nav class="border-b border-gray-100 bg-white sticky top-0 z-40">
-        <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+        <div class="max-w-6xl mx-auto px-6 h-24 flex items-center justify-between">
             <a href="index.html" class="flex items-center gap-2 group">
-                <img src="logo.png" alt="NewsDistill Logo" class="h-12 w-auto opacity-80 group-hover:opacity-100 transition-opacity">
+                <img src="logo.png" alt="NewsDistill Logo" class="h-20 w-auto group-hover:opacity-80 transition-opacity">
             </a>
             <div class="flex items-center gap-6">
                 <a href="about.html" class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">Működés</a>
@@ -55,12 +55,42 @@
                 </div>
             </div>
 
+            <!-- v2: Kisebbségi jelentés (Minority Report) Figyelmeztetés -->
+            <div id="minority-report-box" class="hidden mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-md">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i data-lucide="alert-triangle" class="h-5 w-5 text-yellow-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-yellow-800">Kisebbségi jelentés (Eltérő AI vélemények)</h3>
+                        <div class="mt-2 text-sm text-yellow-700" id="minority-report-text"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- v2: Kontextuális Elemzés (Szarkazmus/Dog-whistle) -->
+            <div id="context-box" class="hidden mb-6 bg-purple-50 border-l-4 border-purple-400 p-4 rounded-r-md">
+                 <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i data-lucide="brain-circuit" class="h-5 w-5 text-purple-500"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-purple-800">Mélyelemzés: Rejtett jelentéstartalom</h3>
+                        <div class="mt-2 text-sm text-purple-700 italic" id="context-text"></div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Alsó sáv: Cikk adatok -->
             <div>
                 <div class="flex flex-wrap items-center gap-3 text-xs md:text-sm text-gray-500 mb-2 uppercase tracking-wide font-semibold">
                     <span id="meta-domain" class="text-blue-600 bg-blue-50 px-2 py-0.5 rounded">Betöltés...</span>
                     <span id="meta-separator" class="text-gray-300">•</span>
                     <span id="meta-author" class="text-gray-500">Szerző keresése...</span>
+                    <!-- v2: Adatbázis Frissesség -->
+                    <span id="db-status" class="hidden ml-auto flex items-center gap-1 px-2 py-0.5 rounded bg-gray-100 text-gray-400 text-[10px] normal-case tracking-normal">
+                        <i data-lucide="database" class="w-3 h-3"></i> Jogtár: <span id="db-date">...</span>
+                    </span>
                 </div>
                 
                 <a href="#" target="_blank" id="meta-title-link" class="text-xl md:text-2xl font-bold text-gray-900 leading-tight hover:text-blue-600 transition-colors block decoration-blue-200 hover:underline underline-offset-4">
@@ -327,6 +357,45 @@
             } else {
                 authorEl.style.display = "none";
                 sepEl.style.display = "none";
+            }
+
+            // v2: Kisebbségi jelentés kezelése
+            const minorityBox = document.getElementById('minority-report-box');
+            if (data.minority_report) {
+                document.getElementById('minority-report-text').textContent = data.minority_report.content;
+                minorityBox.classList.remove('hidden');
+            } else {
+                minorityBox.classList.add('hidden');
+            }
+
+            // v2: Kontextus kezelése
+            const contextBox = document.getElementById('context-box');
+            if (data.contextual_analysis) {
+                document.getElementById('context-text').textContent = data.contextual_analysis;
+                contextBox.classList.remove('hidden');
+            } else {
+                contextBox.classList.add('hidden');
+            }
+
+            // v2: Adatbázis frissesség (Dinamikus)
+            const lastVerified = data.db_version_date || "Ismeretlen"; 
+            const dbDateEl = document.getElementById('db-date');
+            const dbStatusEl = document.getElementById('db-status');
+            
+            dbDateEl.textContent = lastVerified;
+            dbStatusEl.classList.remove('hidden');
+            
+            // Ha ismeretlen vagy régi, jelezzük
+            if (lastVerified === "Ismeretlen") {
+                 dbStatusEl.className = "ml-auto flex items-center gap-1 px-2 py-0.5 rounded bg-gray-200 text-gray-500 text-[10px]";
+            } else {
+                const daysOld = (new Date() - new Date(lastVerified)) / (1000 * 60 * 60 * 24);
+                if (daysOld > 7) {
+                    dbStatusEl.className = "ml-auto flex items-center gap-1 px-2 py-0.5 rounded bg-red-100 text-red-600 text-[10px] normal-case tracking-normal font-bold";
+                    dbDateEl.textContent += " (ELAVULT!)";
+                } else {
+                    dbStatusEl.className = "ml-auto flex items-center gap-1 px-2 py-0.5 rounded bg-green-100 text-green-600 text-[10px] normal-case tracking-normal";
+                }
             }
 
             const riskEl = document.getElementById('risk-badge');

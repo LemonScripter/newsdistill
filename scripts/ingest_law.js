@@ -89,6 +89,19 @@ async function run() {
         }
     }
 
+    // --- META ADATOK GENERÁLÁSA (v2) ---
+    const today = new Date().toISOString().split('T')[0];
+    const metaObject = {
+        "id": "META_INFO",
+        "category": "META", // Ezt a backend szűrni fogja
+        "severity": "LOW",
+        "description": "Adatbázis verziókövetés",
+        "trigger_logic": "N/A",
+        "last_verified": today,
+        "sources": []
+    };
+    fullMatrix.unshift(metaObject);
+
     fs.writeFileSync(OUTPUT_FILE, JSON.stringify(fullMatrix, null, 2));
     console.log("------------------------------------------------");
     console.log(`🎉 KÉSZ! A teljes mátrix mentve ide: ${OUTPUT_FILE}`);

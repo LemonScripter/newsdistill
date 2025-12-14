@@ -2,30 +2,31 @@
 
 **NewsDistill** is an advanced, AI-powered media audit system designed to evaluate news articles for objectivity, legal compliance, and ethical standards. It utilizes a **Parallel Consensus Protocol** involving multiple Large Language Models (LLMs) to ensure unbiased, hallucination-free analysis.
 
-![Version](https://img.shields.io/badge/version-1.0.7_Stable-blue) ![Stack](https://img.shields.io/badge/stack-Netlify_Functions_|_Node.js-green) ![License](https://img.shields.io/badge/license-MIT-purple)
+![Version](https://img.shields.io/badge/version-2.0.0_Stable-blue) ![Stack](https://img.shields.io/badge/stack-Netlify_Functions_|_Node.js-green) ![License](https://img.shields.io/badge/license-MIT-purple)
 
 ---
 
-## 🚀 Key Features (v1.0.7)
+## 🚀 Key Features (v2.0.0)
 
-### 🧠 Multi-AI Consensus Protocol
+### 🧠 Multi-AI Consensus Protocol & "Minority Report"
 Unlike traditional single-model tools, NewsDistill queries **6 top-tier AI models simultaneously** to form a "jury verdict".
+*   **Minority Report Protocol:** The system detects when a specific model identifies a high risk (High/Critical) that others miss. Instead of suppressing this via averaging, it highlights the **dissenting opinion** to prevent "tyranny of the majority."
 *   **Models:** Google Gemini (Flash 1.5), Groq (Llama 3.3), Mistral AI, OpenAI (GPT-4o), xAI (Grok-2), Perplexity (Sonar).
-*   **Aggregation:** The system merges flags, cross-references findings, and averages objectivity scores to eliminate bias from any single model.
-*   **Failover & Resilience:** If one API fails (e.g., rate limit), the analysis continues seamlessly with the remaining models.
+*   **Aggregation:** The system merges flags, cross-references findings, and averages objectivity scores.
 
-### 🛡️ Legal Matrix 2.0
-The core logic relies on a strict, pre-defined JSON database (`data/legal_matrix.json`) containing hard laws and soft laws:
+### 👁️ Contextual Analysis Layer
+*   **Irony & Dog-whistle Detection:** Beyond literal interpretation, v2.0 includes a specialized analysis layer to detect **sarcasm, irony, and coded political messages** ("dog whistles") that strict legal filters might miss.
+*   **Forensic Prompting:** Uses advanced system prompts to separate factual reporting from manipulative commentary.
+
+### 🛡️ Dynamic Legal Matrix
+The core logic relies on a strictly version-controlled JSON database (`data/legal_matrix.json`) that can be auto-updated from official sources:
+*   **Auto-Versioning:** The system tracks the exact version/date of the legal database used for each audit, warning users if the rules are outdated.
 *   **Hard Law:** Romanian Penal Code (Hate Speech), Civil Code (Dignity), Constitution, GDPR.
 *   **Soft Law:** BBC Editorial Guidelines, MÚRE / MÚOSZ Code of Ethics.
-*   **Dynamic Filtering:** Automatically applies specific mission statements (e.g., for *uh.ro*) while keeping general audits neutral for other domains.
-
-### 🔍 Metadata & Forensics
-*   **Scraping Engine:** Extracts article title, author, and source domain even from complex structures.
-*   **Zero-Temperature:** All AI models run at `temperature: 0.1` to strictly forbid creativity and enforce factual analysis.
 
 ### 💻 Modern UI/UX
 *   **Dashboard:** Interactive visualization of risk levels, objectivity scores, and specific violations.
+*   **Context Box:** Dedicated UI area for displaying hidden meanings and sarcastic subtexts.
 *   **Legal Library:** Direct links to official government statutes (Just.ro, EUR-Lex) for every flagged issue.
 *   **Transparency:** Users can compare the original text with a "Neutralized Rewrite" suggested by the AI.
 
