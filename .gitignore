@@ -4,11 +4,18 @@ node_modules/
 # Netlify generated files
 .netlify/
 
-# Environment variables
+# Environment variables (CRITICAL SECURITY)
 .env
 
-# Project status documentation
-project_status.md
+# Logs and temporary files
+konzol.txt
+*.log
+.DS_Store
 
-# Backup directory
+# Backups and Work-in-progress files
 backup/
+netlify/functions/analyze_backup_*.js
+*.rtf
+
+# Project management
+project_status.md

@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NewsDistill - Médiaetikai Auditor</title>
+    <title>NewsDistill - Médiaetikai auditor</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -14,9 +15,15 @@
 </head>
 <body class="text-gray-800 flex flex-col min-h-screen">
     <nav class="border-b border-gray-100 bg-white/80 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-2"><i data-lucide="shield-check" class="w-6 h-6 text-blue-600"></i><span class="font-bold text-xl tracking-tight text-gray-900">NewsDistill</span></div>
-            <div class="text-sm text-gray-500">v1.0.5 Beta</div>
+        <div class="max-w-6xl mx-auto px-6 h-24 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <img src="logo.png" alt="NewsDistill Logo" class="h-20 w-auto">
+            </div>
+            <div class="flex items-center gap-6">
+                <a href="about.html" class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">Működés</a>
+                <a href="sources.html" class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">Forrástár</a>
+                <span class="text-xs text-gray-400 border-l pl-6 py-1">v1.0.7</span>
+            </div>
         </div>
     </nav>
     <section class="hero-pattern py-20 px-6 min-h-[85vh] flex flex-col justify-center">
@@ -26,11 +33,11 @@
             <div class="max-w-2xl mx-auto bg-white p-2 rounded-xl shadow-xl border border-gray-200 flex flex-col md:flex-row gap-2 transition-all focus-within:ring-4 ring-blue-500/10 focus-within:border-blue-500">
                 <div class="relative flex-1">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-lucide="link" class="h-5 w-5 text-gray-400"></i></div>
-                    <input type="text" id="url-input" class="block w-full pl-10 pr-3 py-4 text-gray-900 placeholder-gray-400 bg-transparent border-none focus:ring-0 text-base" placeholder="Másold be a vizsgálandó cikk teljes linkjét!" value="">
+                    <input type="text" id="url-input" class="block w-full pl-10 pr-3 py-4 text-gray-900 placeholder-gray-400 bg-transparent border-none focus:ring-0 focus:outline-none text-base" placeholder="Másold be a vizsgálandó cikk teljes linkjét!" value="">
                 </div>
                 <button onclick="startAnalysis()" id="analyze-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg"><span>Elemzés indítása</span><i data-lucide="arrow-right" class="w-4 h-4"></i></button>
             </div>
-            <p class="mt-4 text-xs text-gray-400">Támogatott forrás: uh.ro | Elemzési idő: ~5-30 másodperc</p>
+            <p class="mt-4 text-xs text-gray-400">Elemzési idő: ~5-30 másodperc</p>
         </div>
         <div class="absolute bottom-0 left-0 w-full flex justify-center pb-8 opacity-30 animate-bounce pointer-events-none">
             <div class="flex gap-8 md:gap-16"><i data-lucide="chevron-down" class="w-8 h-8 text-gray-500"></i></div>
@@ -39,11 +46,68 @@
     <section class="py-16 bg-slate-50 border-t border-slate-200">
         <div class="max-w-4xl mx-auto px-6">
             <h3 class="text-center font-bold text-gray-800 mb-8 uppercase tracking-wider text-sm">Ellenőrzött források és adatbázisok</h3>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                <span class="bg-white p-4 rounded shadow-sm text-sm font-semibold text-slate-600">Codul Civil</span>
-                <span class="bg-white p-4 rounded shadow-sm text-sm font-semibold text-slate-600">Codul Penal</span>
-                <span class="bg-white p-4 rounded shadow-sm text-sm font-semibold text-slate-600">MÚRE Kódex</span>
-                <span class="bg-white p-4 rounded shadow-sm text-sm font-semibold text-slate-600">uh.ro Misszió</span>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+                <!-- Román Alkotmány -->
+                <a href="http://www.cdep.ro/pls/dic/site.page?den=act2_1&par1=2" target="_blank" class="block bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-all border border-slate-100 group">
+                    <div class="flex items-center gap-3 mb-2">
+                        <i data-lucide="book" class="w-5 h-5 text-red-600"></i>
+                        <span class="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">Románia alkotmánya</span>
+                    </div>
+                    <p class="text-xs text-gray-500">Véleménynyilvánítás szabadsága (30. cikk)</p>
+                </a>
+
+                <!-- Btk -->
+                <a href="https://legislatie.just.ro/Public/DetaliiDocument/109855" target="_blank" class="block bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-all border border-slate-100 group">
+                    <div class="flex items-center gap-3 mb-2">
+                        <i data-lucide="gavel" class="w-5 h-5 text-gray-700"></i>
+                        <span class="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">Büntető törvénykönyv</span>
+                    </div>
+                    <p class="text-xs text-gray-500">Gyűlöletbeszéd (369. cikk)</p>
+                </a>
+
+                <!-- Ptk -->
+                <a href="https://legislatie.just.ro/Public/DetaliiDocument/129059" target="_blank" class="block bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-all border border-slate-100 group">
+                    <div class="flex items-center gap-3 mb-2">
+                        <i data-lucide="scale" class="w-5 h-5 text-blue-600"></i>
+                        <span class="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">Polgári törvénykönyv</span>
+                    </div>
+                    <p class="text-xs text-gray-500">Személyiségi jogok (70-75. cikk)</p>
+                </a>
+
+                <!-- GDPR -->
+                <a href="https://eur-lex.europa.eu/legal-content/HU/TXT/?uri=CELEX%3A32016R0679" target="_blank" class="block bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-all border border-slate-100 group">
+                    <div class="flex items-center gap-3 mb-2">
+                        <i data-lucide="shield" class="w-5 h-5 text-blue-500"></i>
+                        <span class="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">GDPR rendelet</span>
+                    </div>
+                    <p class="text-xs text-gray-500">Adatvédelem és sajtószabadság</p>
+                </a>
+
+                <!-- BBC -->
+                <a href="https://www.bbc.com/editorialguidelines/guidelines" target="_blank" class="block bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-all border border-slate-100 group">
+                    <div class="flex items-center gap-3 mb-2">
+                        <i data-lucide="globe" class="w-5 h-5 text-indigo-600"></i>
+                        <span class="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">BBC irányelvek</span>
+                    </div>
+                    <p class="text-xs text-gray-500">Pártatlanság és hitelesség</p>
+                </a>
+
+                <!-- MÚRE -->
+                <a href="https://www.mure.ro/etikai-kodex/" target="_blank" class="block bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-all border border-slate-100 group">
+                    <div class="flex items-center gap-3 mb-2">
+                        <i data-lucide="file-text" class="w-5 h-5 text-green-600"></i>
+                        <span class="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">MÚRE etikai kódex</span>
+                    </div>
+                    <p class="text-xs text-gray-500">Szakmai sztenderdek</p>
+                </a>
+            </div>
+
+            <div class="text-center">
+                <a href="sources.html" class="inline-flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-800 hover:underline transition-colors">
+                    <i data-lucide="library" class="w-4 h-4"></i>
+                    <span>Teljes jogi és etikai forrástár megtekintése</span>
+                </a>
             </div>
         </div>
     </section>

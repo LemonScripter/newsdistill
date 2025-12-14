@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <title>Jogi és Etikai Forrástár - NewsDistill</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .section-title { position: relative; padding-left: 1rem; }
+        .section-title::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #3b82f6; border-radius: 2px; }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-24">
+                <div class="flex items-center gap-4">
+                    <img src="logo.png" alt="NewsDistill Logo" class="h-20 w-auto">
+                    <a href="index.html" class="flex items-center gap-2 text-slate-900 hover:text-blue-600 transition-colors border-l pl-4 border-slate-200">
+                        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                        <span class="font-bold text-lg">Vissza az elemzéshez</span>
+                    </a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="about.html" class="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">Működés</a>
+                    <span class="px-3 py-2 text-sm font-semibold text-blue-700 bg-blue-50 rounded-lg">Forrástár</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="bg-white py-12 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">
+                A médiajog és etika <span class="text-blue-600">alapdokumentumai</span>
+            </h1>
+            <p class="text-lg text-slate-600 max-w-3xl mx-auto">
+                A NewsDistill rendszer elemzési algoritmusa az alábbi, hatályos romániai, európai uniós és nemzetközi jogszabályok, illetve szakmai ajánlások alapján működik.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
+
+        <!-- 1. Romániai jogszabályok (Hard Law) -->
+        <section>
+            <h2 class="text-2xl font-bold text-slate-900 mb-8 section-title flex items-center gap-2">
+                I. Románia Alkotmánya és vonatkozó törvényei (Hard Law)
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- Alkotmány -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm card-hover transition-all duration-300">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-2 bg-red-50 rounded-lg text-red-600"><i data-lucide="book" class="w-6 h-6"></i></div>
+                        <h3 class="font-bold text-lg">Constituția României</h3>
+                    </div>
+                    <ul class="space-y-3 text-sm text-slate-600 mb-6">
+                        <li class="flex gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-green-500 shrink-0"></i> <span><strong>30. cikk:</strong> A véleménynyilvánítás szabadsága és a cenzúra tilalma.</span></li>
+                        <li class="flex gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-green-500 shrink-0"></i> <span><strong>31. cikk:</strong> A hiteles tájékoztatáshoz való jog.</span></li>
+                    </ul>
+                    <a href="http://www.cdep.ro/pls/dic/site.page?den=act2_1&par1=2" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm font-semibold flex items-center gap-1">
+                        Teljes szöveg megnyitása <i data-lucide="external-link" class="w-3 h-3"></i>
+                    </a>
+                </div>
+
+                <!-- Btk (Penal) -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm card-hover transition-all duration-300">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-2 bg-slate-100 rounded-lg text-slate-600"><i data-lucide="gavel" class="w-6 h-6"></i></div>
+                        <h3 class="font-bold text-lg">Codul Penal (Btk.)</h3>
+                    </div>
+                    <ul class="space-y-3 text-sm text-slate-600 mb-6">
+                        <li class="flex gap-2"><i data-lucide="alert-triangle" class="w-4 h-4 text-orange-500 shrink-0"></i> <span><strong>369. cikk:</strong> Uszítás gyűlöletre vagy diszkriminációra.</span></li>
+                        <li class="flex gap-2"><i data-lucide="alert-triangle" class="w-4 h-4 text-orange-500 shrink-0"></i> <span><strong>326. cikk:</strong> Hamis nyilatkozat (pályázatoknál).</span></li>
+                    </ul>
+                    <a href="https://legislatie.just.ro/Public/DetaliiDocument/109855" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm font-semibold flex items-center gap-1">
+                        Hivatalos jogtár (Just.ro) <i data-lucide="external-link" class="w-3 h-3"></i>
+                    </a>
+                </div>
+
+                <!-- Ptk (Civil) -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm card-hover transition-all duration-300">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-2 bg-blue-50 rounded-lg text-blue-600"><i data-lucide="scale" class="w-6 h-6"></i></div>
+                        <h3 class="font-bold text-lg">Codul Civil (Ptk.)</h3>
+                    </div>
+                    <ul class="space-y-3 text-sm text-slate-600 mb-6">
+                        <li class="flex gap-2"><i data-lucide="shield" class="w-4 h-4 text-blue-500 shrink-0"></i> <span><strong>70-75. cikk:</strong> Személyiségi jogok, méltóság, képmás védelme.</span></li>
+                        <li class="flex gap-2"><i data-lucide="shield" class="w-4 h-4 text-blue-500 shrink-0"></i> <span><strong>1349. cikk:</strong> Kártérítési felelősség.</span></li>
+                    </ul>
+                    <a href="https://legislatie.just.ro/Public/DetaliiDocument/129059" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm font-semibold flex items-center gap-1">
+                        Hivatalos jogtár (Just.ro) <i data-lucide="external-link" class="w-3 h-3"></i>
+                    </a>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 2. Európai Uniós jog -->
+        <section>
+            <h2 class="text-2xl font-bold text-slate-900 mb-8 section-title flex items-center gap-2">
+                II. Európai Uniós szabályozás (EU Law)
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- GDPR -->
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800 mb-2">GDPR - Általános adatvédelmi rendelet</h3>
+                        <p class="text-sm text-slate-500 mb-4">(EU) 2016/679 Rendelet</p>
+                        <p class="text-sm text-slate-700 mb-4">
+                            <strong>85. cikk:</strong> A személyes adatok védelmének összeegyeztetése a véleménynyilvánítás szabadságával (újságírói kivétel).
+                        </p>
+                    </div>
+                    <a href="https://eur-lex.europa.eu/legal-content/HU/TXT/?uri=CELEX%3A32016R0679" target="_blank" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                        EUR-Lex Teljes Szöveg
+                    </a>
+                </div>
+
+                <!-- EMFA -->
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800 mb-2">EMFA - Európai Médiaszabadság Törvény</h3>
+                        <p class="text-sm text-slate-500 mb-4">(EU) 2024/1083 Rendelet</p>
+                        <p class="text-sm text-slate-700 mb-4">
+                            Az új uniós keretrendszer a szerkesztői függetlenség védelmére, a médiatulajdonlás átláthatóságára és az állami hirdetések szabályozására.
+                        </p>
+                    </div>
+                    <a href="https://eur-lex.europa.eu/eli/reg/2024/1083/oj" target="_blank" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                        EUR-Lex teljes szöveg
+                    </a>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 3. Etikai Kódexek -->
+        <section>
+            <h2 class="text-2xl font-bold text-slate-900 mb-8 section-title flex items-center gap-2">
+                III. Szakmai etikai kódexek (Soft Law)
+            </h2>
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="divide-y divide-slate-100">
+                    
+                    <!-- MÚRE -->
+                    <div class="p-6 hover:bg-slate-50 transition-colors">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <h3 class="font-bold text-lg text-slate-900">MÚRE Etikai Kódex</h3>
+                                <p class="text-sm text-slate-500">Magyar Újságírók Romániai Egyesülete</p>
+                            </div>
+                            <div class="flex items-center gap-4 text-sm">
+                                <span class="text-slate-600">Kiemelt: tárgyilagosság, kisebbségi jogok</span>
+                                <a href="https://www.mure.ro/etikai-kodex/" target="_blank" class="text-blue-600 font-semibold hover:underline">Megnyitás &rarr;</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MÚOSZ -->
+                    <div class="p-6 hover:bg-slate-50 transition-colors">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <h3 class="font-bold text-lg text-slate-900">MÚOSZ Etikai Kódex</h3>
+                                <p class="text-sm text-slate-500">Magyar Újságírók Országos Szövetsége</p>
+                            </div>
+                            <div class="flex items-center gap-4 text-sm">
+                                <span class="text-slate-600">Kiemelt: szerzői jogok, etikai eljárásrend</span>
+                                <a href="https://muosz.hu/alapdokumentumok/etikai-kodex/" target="_blank" class="text-blue-600 font-semibold hover:underline">Megnyitás &rarr;</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CJI / COM -->
+                    <div class="p-6 hover:bg-slate-50 transition-colors">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <h3 class="font-bold text-lg text-slate-900">Codul Deontologic Unificat</h3>
+                                <p class="text-sm text-slate-500">Centrul pentru Jurnalism Independent (Románia)</p>
+                            </div>
+                            <div class="flex items-center gap-4 text-sm">
+                                <span class="text-slate-600">Kiemelt: Függetlenség, összeférhetetlenség</span>
+                                <a href="https://cji.ro/codul-deontologic/" target="_blank" class="text-blue-600 font-semibold hover:underline">Megnyitás &rarr;</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BBC -->
+                    <div class="p-6 hover:bg-slate-50 transition-colors bg-slate-50/50">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <h3 class="font-bold text-lg text-slate-900">BBC Editorial Guidelines</h3>
+                                <p class="text-sm text-slate-500">A nemzetközi "Arany Standard"</p>
+                            </div>
+                            <div class="flex items-center gap-4 text-sm">
+                                <span class="text-slate-600">Kiemelt: Due Impartiality (Kellő pártatlanság)</span>
+                                <a href="https://www.bbc.com/editorialguidelines/guidelines" target="_blank" class="text-blue-600 font-semibold hover:underline">Megnyitás &rarr;</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Speciális Esetek -->
+        <section>
+            <h2 class="text-2xl font-bold text-slate-900 mb-8 section-title flex items-center gap-2">
+                IV. Specifikus szabályozások és küldetések
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- CNA -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-lg mb-2">CNA - Audiovizuális szabályozás</h3>
+                    <p class="text-sm text-slate-600 mb-4">
+                        A Decizia 220/2011 szabályozza a tévék és rádiók működését, beleértve a magánélet védelmét (32-34. cikk) és a pontos tájékoztatást. 2025-től az online videómegosztókra is vonatkozik.
+                    </p>
+                    <a href="https://www.cna.ro/-Legislatie-.html" target="_blank" class="text-blue-600 hover:underline text-sm font-medium">Jogszabálytár megnyitása</a>
+                </div>
+
+                <!-- uh.ro -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-blue-500">
+                    <h3 class="font-bold text-lg mb-2">uh.ro Misszió</h3>
+                    <p class="text-sm text-slate-600 mb-4">
+                        Az uh.ro belső szabályzata a hitelességet, a függetlenséget és a közösségi szolgálatot ("Hangot adni a némáknak") helyezi középpontba. Ez képezi a "Mission Consistency Check" alapját.
+                    </p>
+                    <a href="https://www.uh.ro/igy-dolgozunk/" target="_blank" class="text-blue-600 hover:underline text-sm font-medium">Misszió megtekintése</a>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 mt-12 py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-slate-500 text-sm">© 2025 NewsDistill Engine. Minden jog fenntartva. | LemondScript - Citrom Média Kft.</p>
+            <p class="text-slate-400 text-xs mt-2">A fenti linkek külső forrásokra mutatnak, tartalmukért felelősséget nem vállalunk.</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

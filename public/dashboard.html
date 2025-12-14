@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Médiaetikai elemzés - Vezérlőpult</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -17,9 +18,21 @@
 
     <div id="loading-overlay" class="fixed inset-0 bg-white/95 backdrop-blur z-50 flex flex-col items-center justify-center hidden">
         <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mb-6"></div>
-        <h2 class="text-2xl font-bold text-gray-800 animate-pulse">AI elemzés folyamatban...</h2>
-        <p class="text-gray-500 mt-2" id="loading-status">Törvényszéki audit protokoll futtatása...</p>
+        <h2 class="text-2xl font-bold text-gray-800 animate-pulse">MI elemzés folyamatban...</h2>
+        <p class="text-gray-500 mt-2" id="loading-status">Szabályellenőrző audit protokoll futtatása...</p>
     </div>
+
+    <nav class="border-b border-gray-100 bg-white sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-2 group">
+                <img src="logo.png" alt="NewsDistill Logo" class="h-12 w-auto opacity-80 group-hover:opacity-100 transition-opacity">
+            </a>
+            <div class="flex items-center gap-6">
+                <a href="about.html" class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">Működés</a>
+                <a href="sources.html" class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">Forrástár</a>
+            </div>
+        </div>
+    </nav>
 
     <div class="max-w-4xl mx-auto p-4 md:p-6 w-full flex-grow" id="main-content">
         
@@ -29,17 +42,30 @@
             </a>
         </div>
 
-        <header class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                    <i data-lucide="shield-alert" class="w-8 h-8 text-blue-600"></i>
-                    AI médiaetikai elemzés
-                </h1>
-                <p class="text-sm text-gray-500 mt-1">Forrás: <a href="#" target="_blank" class="text-blue-500 hover:underline text-xs truncate max-w-md inline-block align-bottom" id="url-link">Betöltés...</a></p>
+        <header class="mb-8 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <!-- Felső sáv: Branding és Kockázat -->
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                <div class="flex items-center gap-4">
+                    <img src="icon.png" alt="NewsDistill Icon" class="h-14 w-auto rounded-lg">
+                    <h2 class="text-xl font-bold text-gray-800">Az MI-audit eredménye</h2>
+                </div>
+                <div class="flex flex-col items-end gap-1">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Kockázati szint</span>
+                    <span id="risk-badge" class="font-bold text-base px-3 py-1 rounded-md bg-gray-100 text-gray-500">...</span>
+                </div>
             </div>
-            <div class="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200">
-                <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">Kockázat:</span>
-                <span id="risk-badge" class="font-bold text-sm px-2 py-0.5 rounded bg-gray-100 text-gray-500">...</span>
+
+            <!-- Alsó sáv: Cikk adatok -->
+            <div>
+                <div class="flex flex-wrap items-center gap-3 text-xs md:text-sm text-gray-500 mb-2 uppercase tracking-wide font-semibold">
+                    <span id="meta-domain" class="text-blue-600 bg-blue-50 px-2 py-0.5 rounded">Betöltés...</span>
+                    <span id="meta-separator" class="text-gray-300">•</span>
+                    <span id="meta-author" class="text-gray-500">Szerző keresése...</span>
+                </div>
+                
+                <a href="#" target="_blank" id="meta-title-link" class="text-xl md:text-2xl font-bold text-gray-900 leading-tight hover:text-blue-600 transition-colors block decoration-blue-200 hover:underline underline-offset-4">
+                    Elemzés folyamatban... <i data-lucide="external-link" class="w-4 h-4 inline-block ml-1 text-gray-400"></i>
+                </a>
             </div>
         </header>
 
@@ -60,7 +86,7 @@
 
             <div class="col-span-1 md:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col justify-center">
                 <h3 class="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wide flex items-center gap-2">
-                    <i data-lucide="file-text" class="w-4 h-4"></i> Összesített jogi vélemény
+                    <i data-lucide="file-text" class="w-4 h-4"></i> Összesített audit eredmény
                 </h3>
                 <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
                     <p id="verdict-text" class="text-gray-700 leading-relaxed font-medium">Betöltés...</p>
@@ -123,6 +149,20 @@
         // --- 1. JOGI HIVATKOZÁSOK (A PONTOS, HIVATALOS NEVEK) ---
         // Ez írja felül a "Mure 1"-et "MÚRE Etikai Kódex 1. cikkely"-re
         const legalCitations = {
+            // ÚJ ID-K (2025.12.14)
+            "RULE_LEGAL_DEFAMATION": "Codul Civil, Art. 72 (Méltóság) és Art. 1349 (Felelősség)",
+            "RULE_LEGAL_PRESUMPTION": "Constituția României, Art. 23 (11) (Ártatlanság vélelme)",
+            "RULE_LEGAL_HATE_SPEECH": "Codul Penal, Art. 369 (Incitarea la ură)",
+            "RULE_LEGAL_GDPR": "EU GDPR Art. 85 / Codul Civil Art. 71",
+            
+            "RULE_ETHICS_ACCURACY": "MÚRE Etikai Kódex 2.3. / BBC Editorial Guidelines (Accuracy)",
+            "RULE_ETHICS_OPINION": "MÚRE Etikai Kódex 2.2. / BBC Editorial Guidelines (Impartiality)",
+            "RULE_ETHICS_REPLY": "MÚRE Etikai Kódex (Egyensúly) / CJI Cod Deontologic",
+            
+            "RULE_INTERNAL_MISSION": "uh.ro Misszió és Alapelvek (Hitelesség)",
+            "MANIPULATÍV_ÉS_EGYOLDALÚ_TARTALOM": "Szakmai Etikai Norma (Hiteles tájékoztatás elve)",
+
+            // Régi ID-k fallback (biztonsági tartalék)
             "RULE_DEFAMATION": "Codul Civil, Art. 72 (Dreptul la demnitate)",
             "RULE_PRESUMPTION": "Constituția României, Art. 23 (11) (Prezumția de nevinovăție)",
             "RULE_HATE_SPEECH": "Codul Penal, Art. 369 (Incitarea la ură)",
@@ -150,6 +190,20 @@
 
         // --- 2. SZABÁLY NEVEK (EMBERI NYELVEN) ---
         const ruleTranslations = {
+            // ÚJ ID-K
+            "RULE_LEGAL_DEFAMATION": "Rágalmazás / Méltóság megsértése",
+            "RULE_LEGAL_PRESUMPTION": "Ártatlanság vélelmének sérelme",
+            "RULE_LEGAL_HATE_SPEECH": "Gyűlöletbeszéd / Uszítás",
+            "RULE_LEGAL_GDPR": "Személyes adatok megsértése (GDPR)",
+            
+            "RULE_ETHICS_ACCURACY": "Pontatlanság / Forráshiány",
+            "RULE_ETHICS_OPINION": "Vélemény és hír keveredése",
+            "RULE_ETHICS_REPLY": "Válaszadási jog megtagadása",
+            
+            "RULE_INTERNAL_MISSION": "Küldetés-ellenes tartalom (uh.ro)",
+            "MANIPULATÍV_ÉS_EGYOLDALÚ_TARTALOM": "Manipulatív / Egyoldalú tartalom",
+
+            // Régi ID-k fallback
             "RULE_DEFAMATION": "Rágalmazás / jóhírnév megsértése",
             "RULE_PRESUMPTION": "Ártatlanság vélelmének sérelme",
             "RULE_HATE_SPEECH": "Gyűlöletbeszéd / uszítás",
@@ -169,9 +223,42 @@
             "IMPAR_1": "Elfogultság (BBC sztenderd)",
             
             "RULE_IMPARTIALITY": "Elfogultság / egyoldalúság",
+            "RULE_BBC_IMPAR_1": "Elfogultság (BBC irányelvek)",
             "RULE_REPL_7": "Válaszadási jog hiánya",
+            "RULE_REPLY": "A válaszadás joga",
             "RULE_UH_MISSION_CONSISTENCY": "uh.ro Misszió megsértése",
-            "FALLBACK": "Általános etikai észrevétel"
+            "RULE_RO_CIVIL_72_1349": "Román Polgári Törvénykönyv, 72. és 1349. cikkely",
+            "RULE_RO_PENAL_369": "Román Büntető Törvénykönyv, 369. cikkely",
+            "RULE_SZABAD_SZÓLÁS": "A szólásszabadság elve",
+            "RULE_DIGNITÁS_VÉDELME": "Az emberi méltóság védelme",
+            "RULE_SAJÁT_KÉPMÁS_VÉDELME": "A saját képmáshoz való jog védelme",
+            "RULE_SZABAD_SZÓLÁS_KORLÁTOZÁSA": "A szólásszabadság korlátozásai",
+            "RULE_KÁRTÉRÍTÉSI_FELELŐSSÉG": "Kártérítési felelősség",
+            "RULE_RÖVID_NÉV": "Rövid név szabály",
+            "UNKNOWN_RULE": "Ismeretlen szabály",
+            // AI-tól érkező új azonosítók
+            "BBC_Impartiality": "Elfogultság (BBC irányelvek)",
+            "MUOSZ_VÉLEMÉNY_SZABADSÁGA": "A véleménynyilvánítás szabadsága",
+            "MUOSZ_Tények_Tisztelete": "A tények tisztelete",
+            "CODUL_Deontologic_Verificarea": "Deontológiai Kódex: Információellenőrzés",
+            "HIREK_ELKULONITES": "Hír és vélemény elkülönítése",
+            "INFORMACIO_ELLENORZES": "Információellenőrzés"
+        };
+
+        const lawReferenceTranslations = {
+            "§ CODUL DEONTOLOGIC UNIFICAT Art 2.3": "Egységes Etikai Kódex, 2.3. cikkely",
+            "§ BBC Editorial Guidelines Section 4: Impartiality": "BBC Szerkesztőségi Irányelvek, 4. szakasz: Elfogulatlanság",
+            "§ MÚOSZ Etikai Kódex 3. §": "MÚOSZ Etikai Kódex, 3. §",
+            "§ MÚOSZ Etikai Kódex 4. §": "MÚOSZ Etikai Kódex, 4. §",
+            "Ismeretlen forrás": "Ismeretlen forrás",
+            // AI-tól érkező új jogi hivatkozások (variációk nélkül vagy más előtaggal)
+            "BBC Editorial Guidelines Section 4: Impartiality": "BBC Szerkesztőségi Irányelvek, 4. szakasz: Elfogulatlanság",
+            "MÚOSZ Etikai Kódex 3. §": "MÚOSZ Etikai Kódex, 3. §",
+            "MÚOSZ Etikai Kódex 4. §": "MÚOSZ Etikai Kódex, 4. §",
+            "CODUL DEONTOLOGIC UNIFICAT Art 2.3": "Egységes Etikai Kódex, 2.3. cikkely",
+            "MÚRE Etikai Kódex 2.2.": "MÚRE Etikai Kódex, 2.2. cikkely (Hír/Vélemény)",
+            "MÚRE Etikai Kódex 2.3.": "MÚRE Etikai Kódex, 2.3. cikkely (Forrásellenőrzés)",
+            "uh.ro Misszió Nyilatkozat (Hitelesség és Szabadság)": "uh.ro Misszió Nyilatkozat (Hitelesség)"
         };
 
         const riskTranslations = { "LOW": "ALACSONY", "MEDIUM": "KÖZEPES", "HIGH": "MAGAS", "CRITICAL": "KRITIKUS", "ERROR": "HIBA" };
@@ -186,9 +273,12 @@
         });
 
         async function initDashboard(url) {
-            document.getElementById('url-link').textContent = url;
-            document.getElementById('url-link').href = url;
+            // Kezdeti állapot beállítása (amíg tölt)
+            const titleLink = document.getElementById('meta-title-link');
+            titleLink.href = url;
+            titleLink.textContent = "Elemzés indítása... (" + url + ")";
             document.getElementById('loading-overlay').classList.remove('hidden'); 
+            
             try {
                 const response = await fetch('/.netlify/functions/analyze', {
                     method: 'POST', body: JSON.stringify({ url: url }), headers: { 'Content-Type': 'application/json' }
@@ -202,6 +292,7 @@
 
         function renderErrorState(msg) {
             const meta = { risk_level: "ERROR", objectivity_score: 0, verdict_summary: `Hiba: ${msg}` };
+            document.getElementById('meta-title-link').textContent = "Elemzési hiba (Kattints a részletekért)";
             renderDashboard({ ui_meta: meta, flags: [], rewritten_article: null });
         }
 
@@ -209,24 +300,45 @@
         function cleanText(text) {
             if (!text) return "";
             return text.replace(/(RULE_[A-Z0-9_]+|Mure \d+|Impar \d+)/g, (match) => {
-                return ruleTranslations[match] || ruleTranslations["RULE_" + match.replace(" ", "_").toUpperCase()] || match;
+                return ruleTranslations[match] || ruleTranslations["RULE_" + match.replace(" ", "_").toUpperCase()] || ruleTranslations["UNKNOWN_RULE"];
             });
         }
 
         function renderDashboard(data) {
             const meta = data.ui_meta || {};
             const flags = data.flags || [];
+            const pageMeta = data.metadata || {}; // Új metadata objektum
+
+            // META ADATOK KITÖLTÉSE
+            const titleLink = document.getElementById('meta-title-link');
+            
+            if (pageMeta.title) titleLink.textContent = pageMeta.title;
+            if (pageMeta.url) titleLink.href = pageMeta.url;
+            if (pageMeta.domain) document.getElementById('meta-domain').textContent = pageMeta.domain.toUpperCase();
+            
+            // Szerző kezelése (csak ha van valódi név)
+            const authorEl = document.getElementById('meta-author');
+            const sepEl = document.getElementById('meta-separator');
+            
+            if (pageMeta.author && pageMeta.author !== "Ismeretlen szerző" && pageMeta.author.trim() !== "") {
+                authorEl.textContent = pageMeta.author;
+                authorEl.style.display = "inline";
+                sepEl.style.display = "inline";
+            } else {
+                authorEl.style.display = "none";
+                sepEl.style.display = "none";
+            }
 
             const riskEl = document.getElementById('risk-badge');
             riskEl.textContent = riskTranslations[meta.risk_level] || meta.risk_level;
             
-            let riskClass = 'bg-gray-100 text-gray-600';
-            if (['HIGH', 'CRITICAL'].includes(meta.risk_level)) riskClass = 'bg-red-100 text-red-700 border border-red-200';
-            else if (meta.risk_level === 'MEDIUM') riskClass = 'bg-yellow-100 text-yellow-700 border border-yellow-200';
-            else if (meta.risk_level === 'LOW') riskClass = 'bg-green-100 text-green-700 border border-green-200';
-            else if (meta.risk_level === 'ERROR') riskClass = 'bg-gray-800 text-white border border-gray-900';
+            let riskClass = 'bg-gray-100 text-gray-600 border-gray-200';
+            if (['HIGH', 'CRITICAL'].includes(meta.risk_level)) riskClass = 'bg-red-100 text-red-700 border-red-200';
+            else if (meta.risk_level === 'MEDIUM') riskClass = 'bg-yellow-100 text-yellow-700 border-yellow-200';
+            else if (meta.risk_level === 'LOW') riskClass = 'bg-green-100 text-green-700 border-green-200';
+            else if (meta.risk_level === 'ERROR') riskClass = 'bg-gray-800 text-white border-gray-900';
             
-            riskEl.className = `font-bold text-sm px-3 py-1 rounded shadow-sm ${riskClass}`;
+            riskEl.className = `font-bold text-base px-3 py-1 rounded-md border ${riskClass}`;
 
             document.getElementById('score-value').textContent = meta.objectivity_score;
             document.getElementById('verdict-text').textContent = cleanText(meta.verdict_summary);
@@ -257,35 +369,50 @@
             }
 
             flags.forEach(flag => {
+                console.log("Processing flag:", flag); // Debugging
                 const isRed = ['RED', 'CRITICAL', 'HIGH'].includes((flag.severity || "").toUpperCase());
                 
                 // FORDÍTÁS
                 let rawId = flag.violation_id || "Ismeretlen";
-                let lookupKey = rawId; 
-                if(!ruleTranslations[lookupKey]) {
-                     lookupKey = rawId.toUpperCase().replace(" ", "_");
-                     if(!ruleTranslations[lookupKey]) lookupKey = "RULE_" + lookupKey;
-                }
-                let translatedId = ruleTranslations[lookupKey];
-                if (!translatedId) {
-                    const rawText = rawId.replace('RULE_', '').replace(/_/g, ' ').toLowerCase();
-                    translatedId = rawText.charAt(0).toUpperCase() + rawText.slice(1);
+                let translatedId = ruleTranslations[rawId]; // 1. Try exact match
+                
+                if (!translatedId) { // 2. Try with RULE_ prefix
+                    translatedId = ruleTranslations["RULE_" + rawId];
                 }
 
-                // JOGALAP (Csak akkor mutatjuk, ha nem ID)
-                let officialLaw = legalCitations[flag.violation_id];
-                let displayLaw = officialLaw;
-                
-                if (!displayLaw) {
-                    let aiLaw = flag.law_reference || "Ismeretlen forrás";
-                    if (aiLaw.includes("RULE_") || aiLaw === flag.violation_id) {
-                        displayLaw = "Szakmai/Etikai norma";
-                    } else {
-                        displayLaw = aiLaw;
+                if (!translatedId) { // 3. Try uppercase with underscores
+                    let formattedRawId = rawId.toUpperCase().replace(/ /g, '_');
+                    translatedId = ruleTranslations[formattedRawId];
+                    if (!translatedId && !formattedRawId.startsWith("RULE_")) { // 4. If not RULE_ prefixed, try adding RULE_
+                        translatedId = ruleTranslations["RULE_" + formattedRawId];
                     }
                 }
 
+                if (!translatedId) { // Fallback to UNKNOWN_RULE if all attempts fail
+                    translatedId = ruleTranslations["UNKNOWN_RULE"];
+                }
+                console.log("Translated ID:", translatedId); // Debugging
+
+                // JOGALAP (Csak akkor mutatjuk, ha nem ID)
+                let displayLaw = legalCitations[flag.violation_id]; // First, try violation_id in legalCitations
+                
+                if (!displayLaw) { // If not found in legalCitations by violation_id
+                    // Try to translate the raw law_reference text
+                    displayLaw = lawReferenceTranslations[flag.law_reference];
+                }
+
+                if (!displayLaw) { // If still not found
+                    let aiLaw = flag.law_reference || "Ismeretlen forrás";
+                    if (aiLaw.includes("RULE_") || aiLaw === flag.violation_id) {
+                        displayLaw = "Szakmai/Etikai norma"; // Fallback for rule IDs
+                    } else {
+                        displayLaw = lawReferenceTranslations[aiLaw] || aiLaw; // If it's a new, untranslated raw legal text, show it as is for now, or translate if aiLaw is a key in lawReferenceTranslations
+                    }
+                }
+                console.log("Display Law:", displayLaw); // Debugging
+
                 const cleanedExplanation = cleanText(flag.explanation);
+                console.log("Original segment after cleanup for display:", String(flag.original_segment || '').replace(/^undefined/, '') || 'N/A');
 
                 // --- 1. HIBÁK KÁRTYA (Minden megjelenik) ---
                 const card = document.createElement('div');
@@ -306,7 +433,7 @@
                                 ${isRed ? '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-700">SÚLYOS</span>' : ''}
                                 ${extraBadge}
                             </div>
-                            <div class="bg-slate-50 border-l-2 border-slate-300 p-3 mb-3 italic text-sm text-slate-700">"${flag.original_segment || 'N/A'}"</div>
+                            <div class="bg-slate-50 border-l-2 border-slate-300 p-3 mb-3 italic text-sm text-slate-700">"${String(flag.original_segment || '').replace(/^undefined/, '') || 'N/A'}"</div>
                             <p class="text-sm font-semibold text-gray-900 mb-1">Audit indoklás:</p>
                             <p class="text-sm text-gray-600 leading-relaxed">${cleanedExplanation}</p>
                             <div class="mt-3 flex items-center gap-1 text-xs text-purple-600 font-mono bg-purple-50 inline-block px-2 py-1 rounded">
@@ -355,12 +482,12 @@
             const btns = ['btn-analysis', 'btn-rewrite', 'btn-legal'];
             btns.forEach(b => {
                  const btn = document.getElementById(b);
-                 btn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all bg-white text-gray-500 hover:text-gray-900 border border-transparent";
+                 btn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all bg-white text-gray-500 hover:text-gray-900 border border-transparent flex items-center gap-2";
             });
             const activeBtn = document.getElementById('btn-' + tabName);
-            if(tabName === 'legal') activeBtn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all text-purple-700 bg-purple-50 border border-purple-200 shadow-sm";
-            else if (tabName === 'rewrite') activeBtn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all text-green-700 bg-green-50 border border-green-200 shadow-sm";
-            else activeBtn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all text-blue-700 bg-blue-50 border border-blue-200 shadow-sm";
+            if(tabName === 'legal') activeBtn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all text-purple-700 bg-purple-50 border border-purple-200 shadow-sm flex items-center gap-2";
+            else if (tabName === 'rewrite') activeBtn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all text-green-700 bg-green-50 border border-green-200 shadow-sm flex items-center gap-2";
+            else activeBtn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all text-blue-700 bg-blue-50 border border-blue-200 shadow-sm flex items-center gap-2";
         }
     </script>
 </body>

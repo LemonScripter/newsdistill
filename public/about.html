@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Működés - NewsDistill</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; }
+        .section-title { position: relative; padding-left: 1rem; }
+        .section-title::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #3b82f6; border-radius: 2px; }
+        .step-number { font-size: 3rem; font-weight: 800; color: #eff6ff; -webkit-text-stroke: 1px #bfdbfe; line-height: 1; margin-bottom: -0.5rem; }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-24">
+                <div class="flex items-center gap-4">
+                    <img src="logo.png" alt="NewsDistill Logo" class="h-20 w-auto">
+                    <a href="index.html" class="flex items-center gap-2 text-slate-900 hover:text-blue-600 transition-colors border-l pl-4 border-slate-200">
+                        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                        <span class="font-bold text-lg">Vissza az elemzéshez</span>
+                    </a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="about.html" class="px-3 py-2 text-sm font-semibold text-blue-700 bg-blue-50 rounded-lg">Működés</a>
+                    <a href="sources.html" class="px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Forrástár</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="bg-white py-16 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-3xl md:text-5xl font-extrabold text-slate-900 mb-6">
+                Hogyan működik a <span class="text-blue-600">NewsDistill</span>?
+            </h1>
+            <p class="text-xl text-slate-600 max-w-2xl mx-auto">
+                A mesterséges intelligenciával támogatott, automatizált médiaauditáló rendszer dokumentációja.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
+
+        <!-- 1. Mi ez? -->
+        <section>
+            <h2 class="text-2xl font-bold text-slate-900 mb-6 section-title">
+                1. Mi ez a rendszer és mi a célja?
+            </h2>
+            <div class="bg-white p-8 rounded-xl border border-slate-200 shadow-sm text-lg leading-relaxed text-slate-700">
+                <p>
+                    A <strong>NewsDistill</strong> egy mesterséges intelligenciával támogatott, automatizált médiaauditáló eszköz.
+                    Célja, hogy egy adott online hírcikket objektív, jogi és etikai szempontok alapján elemezzen, kiszűrve a szubjektivitást, 
+                    a véleményvezérlést és a potenciális törvénysértéseket.
+                </p>
+            </div>
+        </section>
+
+        <!-- 2. Technológia -->
+        <section>
+            <h2 class="text-2xl font-bold text-slate-900 mb-8 section-title">
+                2. Hogyan működik a technológia?
+            </h2>
+            <div class="grid gap-6 md:grid-cols-3">
+                <!-- Step 1 -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
+                    <div class="step-number">01</div>
+                    <h3 class="text-lg font-bold mb-2 relative z-10">Scraping (Letöltés)</h3>
+                    <p class="text-sm text-slate-600 relative z-10">
+                        A felhasználó által megadott URL-ről a rendszer letölti a cikk teljes szövegét, címét és metaadatait.
+                    </p>
+                </div>
+                <!-- Step 2 -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
+                    <div class="step-number">02</div>
+                    <h3 class="text-lg font-bold mb-2 relative z-10">Tisztítás</h3>
+                    <p class="text-sm text-slate-600 relative z-10">
+                        Eltávolítja a reklámokat, menüket és egyéb zavaró elemeket, hogy csak a tiszta tartalom maradjon az elemzéshez.
+                    </p>
+                </div>
+                <!-- Step 3 -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden border-l-4 border-l-blue-500">
+                    <div class="step-number text-blue-100 -webkit-text-stroke-blue-200">03</div>
+                    <h3 class="text-lg font-bold mb-2 relative z-10 text-blue-900">Multi-AI Consensus</h3>
+                    <p class="text-sm text-slate-600 relative z-10">
+                        A feladatot párhuzamosan elküldi több különböző AI motornak (Gemini, Groq, Mistral, OpenAI). 
+                        Ha az egyik tévedne, a többiek eredménye korrigálja azt.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Objektivitás -->
+        <section>
+            <h2 class="text-2xl font-bold text-slate-900 mb-6 section-title">
+                3. Miért nem részrehajló? (Objektivitás-garancia)
+            </h2>
+            <div class="space-y-4">
+                <div class="flex gap-4 items-start bg-slate-50 p-6 rounded-lg">
+                    <div class="bg-blue-100 p-2 rounded text-blue-600"><i data-lucide="thermometer" class="w-6 h-6"></i></div>
+                    <div>
+                        <h3 class="font-bold text-slate-900">"Zero-Temperature" beállítás</h3>
+                        <p class="text-slate-600 text-sm mt-1">Az AI modellek "temperature" paramétere 0.1-re van állítva. Ez azt jelenti, hogy a "kreativitás" ki van kapcsolva. A modell nem fantáziálhat, csak a tényekre támaszkodhat.</p>
+                    </div>
+                </div>
+                <div class="flex gap-4 items-start bg-slate-50 p-6 rounded-lg">
+                    <div class="bg-purple-100 p-2 rounded text-purple-600"><i data-lucide="book-lock" class="w-6 h-6"></i></div>
+                    <div>
+                        <h3 class="font-bold text-slate-900">Kötött szabályrendszer</h3>
+                        <p class="text-slate-600 text-sm mt-1">A prompt nem véleményt kér, hanem logikai feladatot ad: "Keresd meg, melyik mondat sérti a Codul Civil 72. cikkelyét". Ez ténykérdés, nem ízlés dolga.</p>
+                    </div>
+                </div>
+                <div class="flex gap-4 items-start bg-slate-50 p-6 rounded-lg">
+                    <div class="bg-green-100 p-2 rounded text-green-600"><i data-lucide="code-2" class="w-6 h-6"></i></div>
+                    <div>
+                        <h3 class="font-bold text-slate-900">Nyílt forráskód</h3>
+                        <p class="text-slate-600 text-sm mt-1">
+                            A rendszer átlátható. A forráskód és a szabálymátrix (`legal_matrix.json`) nyilvános.
+                            <a href="https://github.com/LemonScripter/newsdistill" target="_blank" class="text-blue-600 hover:underline font-mono ml-1">GitHub Repository &rarr;</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Transzparencia -->
+        <section>
+            <h2 class="text-2xl font-bold text-slate-900 mb-6 section-title">
+                4. Hogyan ellenőrizheted Te is?
+            </h2>
+            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <div class="p-6 border-b border-slate-100 flex items-center gap-3">
+                    <i data-lucide="eye" class="w-5 h-5 text-blue-500"></i>
+                    <span class="font-medium">Az ellenőrzés eszközei a Vezérlőpulton:</span>
+                </div>
+                <div class="p-6 grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="font-bold text-slate-800 mb-2">Törvénytár fül</h4>
+                        <p class="text-sm text-slate-600">
+                            Megtalálod az összes hivatkozott jogszabály pontos szövegét és linkjét a hivatalos állami oldalakra (just.ro, eur-lex).
+                        </p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800 mb-2">Eredeti vs. Javított</h4>
+                        <p class="text-sm text-slate-600">
+                            Összehasonlíthatod a hibásnak jelölt mondatot a rendszer által javasolt semleges verzióval, így láthatod a különbséget.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. Disclaimer -->
+        <section class="bg-amber-50 border-l-4 border-amber-400 p-6 rounded-r-lg">
+            <div class="flex gap-4">
+                <div class="shrink-0"><i data-lucide="alert-triangle" class="w-6 h-6 text-amber-600"></i></div>
+                <div>
+                    <h3 class="font-bold text-amber-900 mb-1">Felelősségkizárás</h3>
+                    <p class="text-sm text-amber-800">
+                        A NewsDistill egy döntéstámogató eszköz. Bár a legmodernebb technológiát és hivatalos jogi adatbázisokat használ, 
+                        az eredményei nem minősülnek jogi tanácsadásnak. Egy esetleges jogvita során mindig konzultáljon ügyvéddel!
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 mt-12 py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-slate-500 text-sm">© 2025 NewsDistill Engine. Minden jog fenntartva.</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

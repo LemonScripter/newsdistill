@@ -8,7 +8,7 @@ try {
 } catch (e) {
     console.error("HIBA: Nem található a legal_matrix.json! (Fallback mód)");
     // Fallback vész esetére
-    fullLegalMatrix = [{ 
+    fullLegalMatrix = [{
         id: "FALLBACK", 
         description: "Általános etikai vizsgálat.", 
         trigger_logic: "Etikátlan tartalom.",
@@ -18,6 +18,14 @@ try {
 
 // --- KONFIGURÁCIÓ: AI SZOLGÁLTATÓK (PRIORITÁSI SORREND) ---
 const getProviders = () => [
+    {
+        id: 'GEMINI',
+        name: 'Google Gemini (Flash 1.5)',
+        key: process.env.GEMINI_API_KEY,
+        url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+        model: 'gemini-1.5-flash',
+        temperature: 0.1
+    },
     {
         id: 'GROQ',
         name: 'Groq (Llama 3.3)',
@@ -61,39 +69,85 @@ const getProviders = () => [
 ];
 
 // --- SEGÉDFÜGGVÉNYEK ---
-function cleanJSON(str) {
-    // Eltávolítja a markdown formázást
-    return str.replace(/```json/g, '').replace(/```/g, '').trim();
+function extractJSON(str) {
+    // Debug log a bemenetről (első 100 karakter)
+    console.log(`[extractJSON] Bemenet hossza: ${str.length}, Eleje: ${str.substring(0, 50)}...`);
+
+    // 1. Megpróbáljuk a markdown blokkok eltávolítását
+    let cleaned = str.replace(/```json/g, '').replace(/```/g, '').trim();
+    
+    // 2. Megkeressük az első '{' és az utolsó '}' karaktert
+    const firstBrace = cleaned.indexOf('{');
+    const lastBrace = cleaned.lastIndexOf('}');
+
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+        const jsonCandidate = cleaned.substring(firstBrace, lastBrace + 1);
+        console.log(`[extractJSON] JSON találat: ${firstBrace}-tól ${lastBrace}-ig.`);
+        return jsonCandidate;
+    }
+
+    console.warn("[extractJSON] NEM találtam JSON objektumot ({...}) a válaszban!");
+    return cleaned; // Ha nem találunk JSON struktúrát, visszaadjuk az eredetit
 }
 
 async function callAIProvider(providerConfig, prompt, systemPrompt) {
     if (!providerConfig.key) return null; // Ha nincs kulcs, átugorjuk
 
     console.log(`[AI] Csatlakozás: ${providerConfig.name}...`);
+    let payload;
+    let headers = { 'Content-Type': 'application/json' };
 
-    const payload = {
-        model: providerConfig.model,
-        messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: prompt }
-        ],
-        temperature: providerConfig.temperature,
-        max_tokens: 2000 // Növelve, hogy biztosan beleférjen minden
-    };
+    // GEMINI SPECIFIKUS KEZELÉS
+    if (providerConfig.id === 'GEMINI') {
+        const fullPrompt = `${systemPrompt}\n\nFELHASZNÁLÓI BEMENET:\n${prompt}`;
+        payload = {
+            contents: [{ parts: [{ text: fullPrompt }] }],
+            generationConfig: {
+                temperature: providerConfig.temperature,
+                maxOutputTokens: 8000 // Gemini támogat nagy kimenetet
+            }
+        };
+        // A Gemini API URL-be kell a kulcs query paraméterként
+    } else {
+        // OPENAI STANDARD KEZELÉS (Groq, Mistral, OpenAI, xAI, Perplexity)
+        payload = {
+            model: providerConfig.model,
+            messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: prompt }
+            ],
+            temperature: providerConfig.temperature,
+            max_tokens: 4000
+        };
+        headers['Authorization'] = `Bearer ${providerConfig.key}`;
+    }
 
     try {
-        const res = await axios.post(providerConfig.url, payload, {
-            headers: { 
-                'Authorization': `Bearer ${providerConfig.key}`, 
-                'Content-Type': 'application/json' 
-            },
-            timeout: 25000 // 25mp limit per hívás
+        let url = providerConfig.url;
+        // Gemini esetén a kulcs az URL-ben van
+        if (providerConfig.id === 'GEMINI') {
+            url = `${url}?key=${providerConfig.key}`;
+        }
+
+        const res = await axios.post(url, payload, {
+            headers: headers,
+            timeout: 25000 
         });
 
-        const content = res.data.choices[0].message.content;
-        return cleanJSON(content);
+        let content;
+        if (providerConfig.id === 'GEMINI') {
+            content = res.data.candidates?.[0]?.content?.parts?.[0]?.text;
+        } else {
+            content = res.data.choices[0].message.content;
+        }
+
+        if (!content) throw new Error("Üres válasz az AI-tól");
+
+        return extractJSON(content);
     } catch (e) {
-        console.error(`[AI] HIBA (${providerConfig.name}):`, e.message);
+        // Részletesebb hibaüzenet logolása
+        const errorMsg = e.response?.data?.error?.message || e.message;
+        console.error(`[AI] HIBA (${providerConfig.name}):`, errorMsg);
         return null;
     }
 }
@@ -114,18 +168,19 @@ exports.handler = async (event, context) => {
 
             // --- 1. SZABÁLYSZŰRÉS ÉS BIZTONSÁGI BESZÚRÁS ---
             
-            // a) Alap szűrés: Kivesszük az UH-t, hogy ne legyen duplikálva, majd visszatesszük, ha kell
-            let activeMatrix = fullLegalMatrix.filter(rule => rule.id !== 'RULE_UH_MISSION_CONSISTENCY');
+            // a) Alap szűrés: Alapértelmezetten kivesszük a "BELSŐ" kategóriájú (pl. uh.ro misszió) szabályokat
+            // Hogy ne zavarjanak más portálok elemzésénél.
+            let activeMatrix = fullLegalMatrix.filter(rule => rule.category !== 'BELSŐ');
 
-            // b) Ha uh.ro a célpont, akkor KÉNYSZERÍTVE beszúrjuk a szabályt!
+            // b) Ha uh.ro a célpont, akkor VISSZATESSZÜK a BELSŐ szabályt az eredeti listából
             if (targetUrl.includes('uh.ro')) {
-                activeMatrix.push({
-                    id: "RULE_UH_MISSION_CONSISTENCY",
-                    description: "Az uh.ro missziója: 'Hitelesen és szabadon'. A portál a közösséget szolgálja, kerüli a rejtett manipulációt és a hatásvadászatot.",
-                    trigger_logic: "Jelezzen, ha a cikk stílusa (pl. gúnyolódó, gonzo, egyoldalú) ellentmond a portál saját 'hiteles és szolgáló' önképének.",
-                    sources: [{ law: "uh.ro Misszió Nyilatkozat", article: "(Hitelesség és Szabadság)" }]
-                });
-                console.log("[Logic] uh.ro detektálva -> Misszió szabály aktiválva.");
+                const missionRule = fullLegalMatrix.find(rule => rule.id === 'RULE_INTERNAL_MISSION');
+                if (missionRule) {
+                    activeMatrix.push(missionRule);
+                    console.log("[Logic] uh.ro detektálva -> RULE_INTERNAL_MISSION aktiválva.");
+                } else {
+                    console.warn("[Logic] uh.ro detektálva, de a RULE_INTERNAL_MISSION nem található a JSON-ben!");
+                }
             }
 
             // c) Prompt generálás - Kiemelten a FORRÁS mezővel
@@ -142,11 +197,17 @@ SZABÁLYKÖNYV:
 ${RULES_TEXT}
 
 KÖTELEZŐ INSTRUKCIÓK A JSON KIMENETHEZ:
-1. 'violation_id': Másold be pontosan az ID-t (pl. RULE_DEFAMATION).
-2. 'law_reference': Másold be pontosan a szabályhoz tartozó 'FORRÁS' mező tartalmát! NE ÍRD IDE A SZABÁLY NEVÉT! Csak a törvényt és a cikkelyt!
+1. 'violation_id': Másold be pontosan az ID-t a fenti SZABÁLYKÖNYVBŐL (pl. RULE_DEFAMATION).
+2. 'law_reference': Másold be pontosan a szabályhoz tartozó 'FORRÁS' mező tartalmát, beleértve az összes előtagot (pl. '§', 'Codul')! NE ÍRD IDE A SZABÁLY NEVÉT! Csak a törvényt és a cikkelyt!
 3. 'severity': LOW, MEDIUM, HIGH, CRITICAL.
 4. 'explanation': Írd le magyarul az indoklást. FONTOS: Ebben a szövegben SOHA NE HASZNÁLJ KÓDOKAT (pl. RULE_MURE_5)!
-5. Misszió ellenőrzés: Ha 'RULE_UH_MISSION_CONSISTENCY' sérelmet találsz, azt mindenképp jelezd külön flag-ként!
+5. Misszió ellenőrzés: Ha 'RULE_INTERNAL_MISSION' sérelmet találsz, azt mindenképp jelezd külön flag-ként!
+
+FIGYELEM: A vlaszod KIZÁRÓLAG a nyers JSON objektum legyen!
+NE írj bevezető szöveget (pl. "Itt van a JSON...").
+NE írj lezáró szöveget.
+NE használj markdown formázást (\`\\\`json).
+CSAK A { ... } TARTALOM KELL!
 
 KIMENET: Valid JSON.
 {
@@ -159,12 +220,12 @@ KIMENET: Valid JSON.
     {
       "violation_id": "Szabály ID (pl. RULE_DEFAMATION)",
       "severity": "RED" | "YELLOW",
-      "original_segment": "Idézet (max 1 mondat)",
+      "original_segment": "Közvetlen, szó szerinti idézet a cikkből (max 1 mondat, VÁLTOZATLAN FORMÁBAN)",
       "explanation": "Indoklás magyarul",
       "law_reference": "A törvény neve és cikkelye (pl. Cod Civil Art. 72)"
     }
   ],
-  "rewritten_article": { 
+  "rewritten_article": {
     "neutral_headline": "Cím javaslat", 
     "neutral_body_html": "HTML szöveg" 
   }
@@ -174,42 +235,57 @@ KIMENET: Valid JSON.
             console.log(`[Scrape] ${body.url}`);
             const scrapeRes = await axios.get(body.url, { headers: { 'User-Agent': 'NewsDistill/1.0' }, timeout: 5000 });
             const $ = cheerio.load(scrapeRes.data);
-            const title = $('h1').text().trim();
+            
+            const title = $('h1').text().trim() || $('meta[property="og:title"]').attr('content') || "Cím nem található";
+            
+            // Bővített szerzőkeresés (több szelektorral)
+            const author = 
+                $('meta[name="author"]').attr('content') || 
+                $('meta[property="article:author"]').attr('content') || 
+                $('.author').first().text().trim() || 
+                $('.post-author').first().text().trim() || 
+                $('.entry-author').first().text().trim() || 
+                $('.byline').first().text().trim() || 
+                $('a[rel="author"]').first().text().trim() || 
+                "Ismeretlen szerző";
+
+            const domain = new URL(targetUrl).hostname.replace('www.', '');
+
             // Tartalomkeresés fallback logikával
             let content = $('article').text().trim() || $('div.entry-content').text().trim() || $('p').text().trim();
             
-            // Limitáljuk a hosszt a sebesség érdekében (kb. 6500 karakter)
-            const truncatedContent = content.substring(0, 6500);
-            const userPrompt = `CÍM: ${title}\n\nTARTALOM (Részlet):\n${truncatedContent}`;
+            // Limitáljuk a hosszt a sebesség érdekében (kb. 25000 karakter - Gemini/GPT-4o elbírja)
+            const truncatedContent = content.substring(0, 25000);
+            const userPrompt = `CÍM: ${title}\nSZERZŐ: ${author}\n\nTARTALOM (Részlet):\n${truncatedContent}`;
 
-            // --- 3. FAILOVER LOGIKA (Vízesés modell) ---
+            // --- 3. PÁRHUZAMOS ELEMZÉS ÉS AGGREGÁCIÓ (Consensus Protocol) ---
             const providers = getProviders();
-            let finalResult = null;
-            let failedLog = [];
+            // Csak azokat futtatjuk, amikhez van kulcs. 
+            // Megemeljük a limitet 6-ra, hogy MINDENKI (Gemini, Groq, Mistral, OpenAI, xAI, Perplexity) beleférjen!
+            const activeProviders = providers.filter(p => p.key).slice(0, 6);
+            
+            console.log(`[Consensus] Indítás ${activeProviders.length} modellel: ${activeProviders.map(p => p.name).join(', ')}`);
 
-            for (const provider of providers) {
-                if (!provider.key) continue;
-
+            // Párhuzamos indítás (Promise.allSettled, hogy ne dőljön be, ha egy hibázik)
+            const promises = activeProviders.map(async (provider) => {
                 try {
                     const rawJson = await callAIProvider(provider, userPrompt, SYSTEM_PROMPT);
-                    
-                    if (rawJson) {
-                        // Validálás: Megpróbáljuk JSON-ként értelmezni
-                        finalResult = JSON.parse(rawJson);
-                        
-                        console.log(`✅ SIKERES ELEMZÉS (${provider.name})!`);
-                        // Metaadatba beírjuk az auditáló nevét
-                        finalResult.ui_meta.verdict_summary += ` (Auditálta: ${provider.name})`;
-                        break; // Siker, kilépünk!
-                    }
+                    if (!rawJson) throw new Error("Empty response");
+                    const parsed = JSON.parse(rawJson);
+                    return { provider: provider.name, data: parsed, success: true };
                 } catch (e) {
-                    console.error(`❌ JSON Parse Hiba (${provider.name}) - A válasz nem volt valid JSON.`);
-                    failedLog.push(`${provider.name}: Invalid JSON response`);
+                    console.error(`❌ HIBA (${provider.name}):`, e.message);
+                    return { provider: provider.name, error: e.message, success: false };
                 }
-            }
+            });
 
-            // --- 4. VÉGLEGES VÁLASZ ---
-            if (!finalResult) {
+            const results = await Promise.allSettled(promises);
+            const successfulResults = results
+                .filter(r => r.status === 'fulfilled' && r.value.success)
+                .map(r => r.value);
+
+            // --- 4. EREDMÉNYEK ÖSSZEFÉSÜLÉSE ---
+            if (successfulResults.length === 0) {
                 console.error("VÉGZETES: Minden AI elutasította a kérést.");
                 return {
                     statusCode: 200, 
@@ -217,7 +293,7 @@ KIMENET: Valid JSON.
                         ui_meta: {
                             risk_level: "ERROR",
                             objectivity_score: 0,
-                            verdict_summary: "Sajnos technikai okok miatt az elemzés nem sikerült. A rendszer jelenleg túlterhelt, vagy a mesterséges intelligencia modellek nem érhetőek el. Kérjük, próbálja újra 15-30 perc múlva."
+                            verdict_summary: "Nem sikerült az elemzés egyetlen modellel sem. (Ellenőrizd az API kulcsokat!)"
                         },
                         flags: [],
                         rewritten_article: null
@@ -225,6 +301,68 @@ KIMENET: Valid JSON.
                 };
             }
 
+            // Aggregáció logika
+            let combinedFlags = [];
+            let totalScore = 0;
+            let summaries = [];
+            let riskLevels = [];
+            // Prioritási sorrend a kockázatokhoz
+            const riskOrder = { "CRITICAL": 4, "HIGH": 3, "MEDIUM": 2, "LOW": 1 };
+            const riskLevelNames = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
+
+            successfulResults.forEach(res => {
+                const { provider, data } = res;
+                
+                // 1. Flags: Minden flaghez hozzáadjuk a forrást
+                if (data.flags && Array.isArray(data.flags)) {
+                    const taggedFlags = data.flags.map(f => ({
+                        ...f,
+                        explanation: `[${provider}] ${f.explanation}` // Megjelöljük, ki mondta
+                    }));
+                    combinedFlags.push(...taggedFlags);
+                }
+
+                // 2. Score: Átlagoláshoz gyűjtünk
+                totalScore += (data.ui_meta.objectivity_score || 0);
+
+                // 3. Summary: Gyűjtés
+                summaries.push(`**${provider}:** ${data.ui_meta.verdict_summary}`);
+
+                // 4. Risk: Gyűjtés
+                if (data.ui_meta.risk_level) riskLevels.push(data.ui_meta.risk_level);
+            });
+
+            // Végső számítások
+            const avgScore = Math.round(totalScore / successfulResults.length);
+            const finalSummary = summaries.join('\n\n');
+            
+            // Legrosszabb kockázat kiválasztása (Worst-case scenario)
+            let maxRiskVal = 0;
+            riskLevels.forEach(r => {
+                if (riskOrder[r] > maxRiskVal) maxRiskVal = riskOrder[r];
+            });
+            const finalRisk = maxRiskVal > 0 ? riskLevelNames[maxRiskVal - 1] : "LOW";
+
+            // Az első sikeres modell rewrite-ját használjuk (egyszerűsítés)
+            const finalRewrite = successfulResults[0].data.rewritten_article;
+
+            const finalResult = {
+                metadata: {
+                    title: title,
+                    author: author,
+                    domain: domain,
+                    url: targetUrl
+                },
+                ui_meta: {
+                    risk_level: finalRisk,
+                    objectivity_score: avgScore,
+                    verdict_summary: finalSummary
+                },
+                flags: combinedFlags,
+                rewritten_article: finalRewrite
+            };
+            
+            console.log(`✅ SIKERES AGGREGÁCIÓ: ${successfulResults.length} modell alapján.`);
             return { statusCode: 200, body: JSON.stringify(finalResult) };
 
         } catch (error) {

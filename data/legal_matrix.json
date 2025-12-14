@@ -1,496 +1,91 @@
 [
   {
-    "id": "BBC_Impartiality",
-    "category": "Szakmai Standardok",
+    "id": "RULE_LEGAL_DEFAMATION",
+    "category": "JOGI",
     "severity": "HIGH",
-    "description": "Az elfogulatlanság alapkövetelmény. A híradás nem tükrözheti az újságíró vagy a szerkesztőség magánvéleményét. Ellentmondásos témákban minden releváns nézőpontot be kell mutatni.",
-    "trigger_logic": "Ha a híradás tartalmazza az újságíró vagy a szerkesztőség magánvéleményét, vagy nem mutatja be minden releváns nézőpontot ellentmondásos témákban.",
+    "description": "Tilos a jóhírnév, a becsület és a méltóság megsértése valós ténybeli alap nélkül.",
+    "trigger_logic": "Ha a cikk sértő, megalázó állítást közöl bizonyíték nélkül, vagy magánéleti titkokat tereget ki közérdek hiányában.",
     "sources": [
-      {
-        "law": "BBC Editorial Guidelines",
-        "article": "Section 4: Impartiality"
-      }
+      { "law": "Codul Civil", "article": "Art. 72 (Méltóság), Art. 73 (Képmás)" },
+      { "law": "Codul Civil", "article": "Art. 1349 (Felelősség)" },
+      { "law": "Constituția României", "article": "Art. 30 (6)" }
     ]
   },
   {
-    "id": "MUOSZ_Tények_Tisztelete",
-    "category": "Szakmai Standardok",
+    "id": "RULE_LEGAL_PRESUMPTION",
+    "category": "JOGI",
     "severity": "HIGH",
-    "description": "Az újságíró kötelessége a tények pontos, torzításmentes közlése.",
-    "trigger_logic": "Ha a híradás tartalmaz torzított vagy pontatlan tényeket.",
+    "description": "Bűnösségről tényként csak jogerős bírói ítélet után lehet írni. A gyanúsított nem nevezhető bűnösnek.",
+    "trigger_logic": "Ha a cikk bűnözőnek/tolvajnak/gyilkosnak nevez valakit jogerős ítélet említése nélkül.",
     "sources": [
-      {
-        "law": "MÚOSZ Etikai Kódex",
-        "article": "3. §"
-      }
+      { "law": "Constituția României", "article": "Art. 23 (11)" },
+      { "law": "EU Directive", "article": "2016/343" }
     ]
   },
   {
-    "id": "MUOSZ_Vélemény_Szabadsága",
-    "category": "Szakmai Standardok",
-    "severity": "HIGH",
-    "description": "A vélemény szabadsága nem mentesít a tények tisztelete alól. A kommentárt világosan el kell választani a hírtől.",
-    "trigger_logic": "Ha a kommentár nem világosan elkülönül a hírtől.",
-    "sources": [
-      {
-        "law": "MÚOSZ Etikai Kódex",
-        "article": "4. §"
-      }
-    ]
-  },
-  {
-    "id": "MUOSZ_Rejtett_Reklám",
-    "category": "Szakmai Standardok",
+    "id": "RULE_LEGAL_HATE_SPEECH",
+    "category": "JOGI",
     "severity": "CRITICAL",
-    "description": "Tilos a rejtett reklám és a politikai megrendelésre írt, de függetlennek álcázott tartalom.",
-    "trigger_logic": "Ha a híradás tartalmaz rejtett reklámot vagy politikai megrendelésre írt, de függetlennek álcázott tartalmat.",
+    "description": "Bűncselekmény a nyilvános uszítás, gyűlöletkeltés vagy diszkriminációra való felbujtás.",
+    "trigger_logic": "Ha a szöveg erőszakra buzdít vagy gyűlöletet szít egy védett csoport (etnikum, vallás, nemzetiség) ellen.",
     "sources": [
-      {
-        "law": "MÚOSZ Etikai Kódex",
-        "article": "4. §"
-      }
+      { "law": "Codul Penal", "article": "Art. 369 (Incitarea la ură)" }
     ]
   },
   {
-    "id": "CODUL_Deontologic_Közvélemény",
-    "category": "Szakmai Standardok",
+    "id": "RULE_LEGAL_GDPR",
+    "category": "JOGI",
     "severity": "HIGH",
-    "description": "Az újságíró elsődleges felelőssége a közvélemény iránt van, nem a tulajdonos vagy a hatóságok iránt.",
-    "trigger_logic": "Ha az újságíró cselekményei mutatják, hogy elsődleges felelőssége nem a közvélemény iránt van.",
+    "description": "Szenzitív személyes adatok (egészségügyi, lakcím) kezelése és közlése tilos, kivéve, ha közérdeket szolgál.",
+    "trigger_logic": "Ha a cikk magánszemélyek adatait közli beleegyezés nélkül és közérdek hiányában.",
     "sources": [
-      {
-        "law": "CODUL DEONTOLOGIC UNIFICAT",
-        "article": "Art 2.1"
-      }
+      { "law": "GDPR (EU 2016/679)", "article": "Art. 85" },
+      { "law": "Codul Civil", "article": "Art. 71" }
     ]
   },
   {
-    "id": "CODUL_Deontologic_Verificarea",
-    "category": "Szakmai Standardok",
+    "id": "RULE_ETHICS_ACCURACY",
+    "category": "ETIKAI",
     "severity": "HIGH",
-    "description": "Az újságíró köteles minden információt legalább két, egymástól független forrásból ellenőrizni, mielőtt közzéteszi. Ésszerű kétely esetén köteles ezt jelezni.",
-    "trigger_logic": "Ha az újságíró nem ellenőrzi az információt legalább két független forrásból, vagy nem jelzi az ésszerű kételyt.",
+    "description": "Az újságíró kötelessége a tények pontos, torzításmentes közlése és a források megjelölése (több forrás elve).",
+    "trigger_logic": "Ha a cikk súlyos tényállításokat közöl forrásmegjelölés nélkül, vagy egyoldalúan tájékoztat.",
     "sources": [
-      {
-        "law": "CODUL DEONTOLOGIC UNIFICAT",
-        "article": "Art 2.3"
-      }
+      { "law": "MÚRE Etikai Kódex", "article": "2.3." },
+      { "law": "MÚOSZ Kódex", "article": "3. §" },
+      { "law": "BBC Guidelines", "article": "Accuracy" },
+      { "law": "CODUL DEONTOLOGIC", "article": "Art 2.3" }
     ]
   },
   {
-    "id": "CODUL_Deontologic_Replica",
-    "category": "Szakmai Standardok",
-    "severity": "HIGH",
-    "description": "A kritizált félnek meg kell adni a válaszadás jogát.",
-    "trigger_logic": "Ha a kritizált félnek nem adnak lehetőséget a válaszadásra.",
-    "sources": [
-      {
-        "law": "CODUL DEONTOLOGIC UNIFICAT",
-        "article": "Art 3.2"
-      }
-    ]
-  },
-  {
-    "id": "GDPR_ART_85",
-    "category": "Adatvédelem",
-    "severity": "HIGH",
-    "description": "Szenzitív személyes adatok (egészségügyi, politikai, vallási) kezelése és közlése tilos, kivéve, ha az újságírói célból történik és közérdeket szolgál.",
-    "trigger_logic": "Ha a médiában szenzitív személyes adatok jelennek meg újságírói célok nélkül vagy közérdek nélkül.",
-    "sources": [
-      {
-        "law": "GDPR (EU 2016/679)",
-        "article": "Art. 85"
-      }
-    ]
-  },
-  {
-    "id": "EMFA_ART_6_2",
-    "category": "Médiaszabadság",
+    "id": "RULE_ETHICS_OPINION",
+    "category": "ETIKAI",
     "severity": "MEDIUM",
-    "description": "A médiaszolgáltatók biztosítják, hogy a szerkesztői döntések meghozatalára a tulajdonosoktól vagy más külső szereplőktől függetlenül kerüljön sor.",
-    "trigger_logic": "Ha a médiában a szerkesztői döntések meghozatalában külső szereplők vesznek részt.",
+    "description": "A híradásnak tárgyilagosnak kell lennie. A véleményt (kommentárt) világosan el kell választani a hírtől.",
+    "trigger_logic": "Ha a hírblokkban érzelmi töltetű jelzők, szubjektív vélemények keverednek a tényekkel.",
     "sources": [
-      {
-        "law": "EMFA (EU) 2024/1083",
-        "article": "Art. 6 (2)"
-      }
+      { "law": "MÚRE Etikai Kódex", "article": "2.2." },
+      { "law": "BBC Guidelines", "article": "Impartiality" }
     ]
   },
   {
-    "id": "ECHR_VON_HANNOVER",
-    "category": "Szabadságjogok",
-    "severity": "HIGH",
-    "description": "A magánélet védelme és a szólásszabadság közötti mérlegelésnél a döntő szempont: hozzájárul-e a közlés egy közérdekű vitához? A puszta kíváncsiság kielégítése (bulvár) nem élvez elsőbbséget a magánélettel szemben.",
-    "trigger_logic": "Ha a médiában megjelent közlés nem szolgál közérdekű vitát, hanem puszta kíváncsiságot kielégít.",
-    "sources": [
-      {
-        "law": "ECHR (Emberi Jogok Európai Egyezménye)",
-        "article": "Von Hannover v. Germany (No. 2)"
-      }
-    ]
-  },
-  {
-    "id": "HIREK_ELKULONITES",
-    "category": "Szakmai Etika",
+    "id": "RULE_ETHICS_REPLY",
+    "category": "ETIKAI",
     "severity": "MEDIUM",
-    "description": "A híreket, információkat és tényeket a vélemények és kommentároktól egyértelműen el kell különíteni, és a hírmagyarázatban meg kell jelölni a felhasznált forrásokat.",
-    "trigger_logic": "Ha a cikk nem különíti el a híreket a véleményektől vagy nem jelöli meg a forrásokat.",
+    "description": "A kritizált félnek meg kell adni a válaszadás jogát (Audiatur et altera pars).",
+    "trigger_logic": "Ha a cikk súlyos kritikát fogalmaz meg valaki ellen, de nem szólaltatja meg az érintettet.",
     "sources": [
-      {
-        "law": "MÚRE Etikai Kódex",
-        "article": "2.2."
-      }
+      { "law": "MÚRE Etikai Kódex", "article": "Egyensúly elve" },
+      { "law": "CJI Cod Deontologic", "article": "Art 3.2" }
     ]
   },
   {
-    "id": "INFORMACIO_ELLENORZES",
-    "category": "Szakmai Etika",
+    "id": "RULE_INTERNAL_MISSION",
+    "category": "BELSŐ",
     "severity": "HIGH",
-    "description": "Az újságíró kötelessége ellenőrizni a közlésre szánt információk valóságtartalmát, és súlyos tényállítások vagy vádak esetén kötelező a forrásmegjelölés.",
-    "trigger_logic": "Ha a cikk súlyos tényállításokat vagy vádakat tartalmaz, de nincs forrásmegjelölés.",
+    "description": "Az uh.ro missziója: 'Hitelesen és szabadon'. A portál a közösséget szolgálja, kerüli a manipulációt.",
+    "trigger_logic": "Ha a cikk stílusa (pl. gonzo, gúnyolódó, hatásvadász) ellentmond a portál saját hitelességi alapelveinek.",
     "sources": [
-      {
-        "law": "MÚRE Etikai Kódex",
-        "article": "2.3."
-      }
-    ]
-  },
-  {
-    "id": "ETIKAI_VETEG",
-    "category": "Szakmai Etika",
-    "severity": "CRITICAL",
-    "description": "A rágalmazás, becsületsértés, hamis vád, okirathamisítás, valamint a tények elhallgatása vagy elferdítése súlyos etikai vétség.",
-    "trigger_logic": "Ha a cikk rágalmazást, becsületsértést, hamis vádat, okirathamisítást, vagy tények elhallgatását/elferdítését tartalmaz.",
-    "sources": [
-      {
-        "law": "MÚRE Etikai Kódex",
-        "article": "2.4."
-      }
-    ]
-  },
-  {
-    "id": "EMBERI_MELTOSAG",
-    "category": "Szakmai Etika",
-    "severity": "HIGH",
-    "description": "Az újságíró tiszteletben tartja az emberi méltóságot és a magánélethez való jogot. Magánszemélyek adatait csak az érintett beleegyezésével vagy kiemelt közérdek esetén hozhatja nyilvánosságra.",
-    "trigger_logic": "Ha a cikk magánszemélyek adatait közli az érintett beleegyezésének hiányában és nincs kiemelt közérdek.",
-    "sources": [
-      {
-        "law": "MÚRE Etikai Kódex",
-        "article": "4.1."
-      }
-    ]
-  },
-  {
-    "id": "EGYENSULY_ELVE",
-    "category": "Szakmai Etika",
-    "severity": "MEDIUM",
-    "description": "Amennyiben egy cikk súlyos kritikát vagy vádat fogalmaz meg egy személy vagy intézmény ellen, az újságírónak kötelessége lehetőséget biztosítani az érintett félnek a válaszadásra, lehetőleg ugyanabban a cikkben.",
-    "trigger_logic": "Ha a cikk súlyos kritikát vagy vádat tartalmaz, de nincs lehetőség az érintett félnek a válaszadásra.",
-    "sources": [
-      {
-        "law": "MÚRE Etikai Kódex",
-        "article": "Egyensúly elve (Audiatur et altera pars)"
-      }
-    ]
-  },
-  {
-    "id": "ARTICOLUL_23",
-    "category": "Ártatlanság vélelme",
-    "severity": "HIGH",
-    "description": "A személy bűnösnek nem tekinthető, amíg végleges ítélet nem született ellene.",
-    "trigger_logic": "Ha egy cikk bűnügyi esetről ír és a személyt bűnösnek ábrázolja, mielőtt végleges ítélet született.",
-    "sources": [
-      {
-        "law": "Constituția României",
-        "article": "Articolul 23"
-      }
-    ]
-  },
-  {
-    "id": "ARTICOLUL_26",
-    "category": "Magánszféra",
-    "severity": "HIGH",
-    "description": "A hatóságok tiszteletben tartják és védik a személyek magán-, családi és intim életét.",
-    "trigger_logic": "Ha egy cikk paparazzi fotókat, engedély nélküli felvételeket vagy magánéleti pletykákat tartalmaz.",
-    "sources": [
-      {
-        "law": "Constituția României",
-        "article": "Articolul 26"
-      }
-    ]
-  },
-  {
-    "id": "ARTICOLUL_30_6",
-    "category": "Szólásszabadság",
-    "severity": "CRITICAL",
-    "description": "A szólásszabadság nem sérelheti meg a személyek méltóságát, becsületét, magánéletét vagy a saját képük jogát.",
-    "trigger_logic": "Ha egy cikk gyűlöletbeszédet, rágalmazást vagy személyek magánéletének megsértését tartalmaz.",
-    "sources": [
-      {
-        "law": "Constituția României",
-        "article": "Articolul 30 (6)"
-      }
-    ]
-  },
-  {
-    "id": "ARTICOLUL_30_7",
-    "category": "Szólásszabadság",
-    "severity": "CRITICAL",
-    "description": "Tiltott az ország és nemzet becsmérlése, háborúra való buzdítás, nemzeti, rasszista, osztály- vagy vallási gyűlölet, diszkriminációra, területi szeparatizmusra vagy nyilvános erőszakra való buzdítás.",
-    "trigger_logic": "Ha egy cikk az országot vagy nemzetet becsmérli, háborúra buzdít, gyűlöletet szít vagy erőszakra buzdít.",
-    "sources": [
-      {
-        "law": "Constituția României",
-        "article": "Articolul 30 (7)"
-      }
-    ]
-  },
-  {
-    "id": "ARTICOLUL_31_4",
-    "category": "Tájékozódáshoz való jog",
-    "severity": "HIGH",
-    "description": "A médiának kötelező a közvélemény helyes tájékoztatása.",
-    "trigger_logic": "Ha egy cikk hazudik vagy ferdít, thereby sérti az Alkotmány 31. cikkének (4) bekezdését.",
-    "sources": [
-      {
-        "law": "Constituția României",
-        "article": "Articolul 31 (4)"
-      }
-    ]
-  },
-  {
-    "id": "RULE_SZABAD_SZÓLÁS",
-    "category": "Személyiségi Jogok",
-    "severity": "MEDIUM",
-    "description": "Mindenkinek joga van a szabad szóláshoz, de ezt a jogot csak a törvényben meghatározott esetekben korlátozhatják.",
-    "trigger_logic": "Ha a cikk a szabad szólás jogának korlátozásáról szól, és nem felel meg az art. 75 feltételeinek.",
-    "sources": [
-      {
-        "law": "Codul Civil",
-        "article": "Art. 70"
-      }
-    ]
-  },
-  {
-    "id": "RULE_DIGNITÁS_VÉDELME",
-    "category": "Személyiségi Jogok",
-    "severity": "HIGH",
-    "description": "Mindenkinek joga van a saját méltóságának tiszteletben tartására, és tilos mások becsületét és hírnevét sérteni anélkül, hogy azok beleegyeztek.",
-    "trigger_logic": "Ha a cikk egy személy becsületét vagy hírnevét sérti anélkül, hogy az illető beleegyezett.",
-    "sources": [
-      {
-        "law": "Codul Civil",
-        "article": "Art. 72"
-      }
-    ]
-  },
-  {
-    "id": "RULE_SAJÁT_KÉPMÁS_VÉDELME",
-    "category": "Személyiségi Jogok",
-    "severity": "HIGH",
-    "description": "Mindenkinek joga van a saját képének védelméhez, és tilos mások fizikai megjelenítését reprodukálni anélkül, hogy azok beleegyeztek.",
-    "trigger_logic": "Ha a cikk egy személy képét használja fel anélkül, hogy az illető beleegyezett.",
-    "sources": [
-      {
-        "law": "Codul Civil",
-        "article": "Art. 73"
-      }
-    ]
-  },
-  {
-    "id": "RULE_SZABAD_SZÓLÁS_KORLÁTOZÁSA",
-    "category": "Személyiségi Jogok",
-    "severity": "MEDIUM",
-    "description": "A szabad szólás jogának korlátozása csak akkor minősül jogsértésnek, ha a közlés a törvényi keretek kívül esik, vagy a jogokat rosszhiszeműen gyakorolják.",
-    "trigger_logic": "Ha a cikk a szabad szólás jogának korlátozásáról szól, és nem felel meg az art. 75 feltételeinek.",
-    "sources": [
-      {
-        "law": "Codul Civil",
-        "article": "Art. 75"
-      }
-    ]
-  },
-  {
-    "id": "RULE_KÁRTÉRÍTÉSI_FELELŐSSÉG",
-    "category": "Felelősség",
-    "severity": "CRITICAL",
-    "description": "Aki másnak jogellenesen kárt okoz (pl. rágalmazással), köteles azt megtéríteni. Az újságíró felelőssége fennáll, ha nem ellenőrizte a tényeket.",
-    "trigger_logic": "Ha a cikk egy személy jogellenes kár okozásáról szól, vagy egy újságíró felelősségéről, ha nem ellenőrizte a tényeket.",
-    "sources": [
-      {
-        "law": "Codul Civil",
-        "article": "Art. 1349"
-      }
-    ]
-  },
-  {
-    "id": "BBC_IMPARTIALITY",
-    "category": "Szakmai Standardok",
-    "severity": "HIGH",
-    "description": "A híradás nem tükrözheti az újságíró vagy a szerkesztőség magánvéleményét. Ellentmondásos témákban minden releváns nézőpontot be kell mutatni.",
-    "trigger_logic": "Ha a híradás tartalmazza az újságíró vagy a szerkesztőség magánvéleményét, vagy nem mutatja be minden releváns nézőpontot ellentmondásos témákban.",
-    "sources": [
-      {
-        "law": "BBC Editorial Guidelines",
-        "article": "Section 4: Impartiality"
-      }
-    ]
-  },
-  {
-    "id": "MUOSZ_TENYEK_TISZTELETE",
-    "category": "Szakmai Standardok",
-    "severity": "HIGH",
-    "description": "Az újságíró kötelessége a tények pontos, torzításmentes közlése.",
-    "trigger_logic": "Ha a híradás tartalmaz torzított vagy pontatlan tényeket.",
-    "sources": [
-      {
-        "law": "MÚOSZ Etikai Kódex",
-        "article": "3. §"
-      }
-    ]
-  },
-  {
-    "id": "MUOSZ_VÉLEMÉNY_SZABADSÁGA",
-    "category": "Szakmai Standardok",
-    "severity": "HIGH",
-    "description": "A vélemény szabadsága nem mentesít a tények tisztelete alól. A kommentárt világosan el kell választani a hírtől.",
-    "trigger_logic": "Ha a kommentár nem világosan elkülönül a hírtől, vagy a vélemény a tények tiszteletét sérti.",
-    "sources": [
-      {
-        "law": "MÚOSZ Etikai Kódex",
-        "article": "4. §"
-      }
-    ]
-  },
-  {
-    "id": "MUOSZ_REJTETT_REKLÁM",
-    "category": "Szakmai Standardok",
-    "severity": "CRITICAL",
-    "description": "Tilos a rejtett reklám és a politikai megrendelésre írt, de függetlennek álcázott tartalom.",
-    "trigger_logic": "Ha a tartalom rejtett reklámot vagy politikai megrendelésre írt, de függetlennek álcázott tartalmat tartalmaz.",
-    "sources": [
-      {
-        "law": "MÚOSZ Etikai Kódex",
-        "article": "4. §"
-      }
-    ]
-  },
-  {
-    "id": "CODUL_DEONTOLOGIC_FELELŐSSÉG",
-    "category": "Szakmai Standardok",
-    "severity": "HIGH",
-    "description": "Az újságíró elsődleges felelőssége a közvélemény iránt van, nem a tulajdonos vagy a hatóságok iránt.",
-    "trigger_logic": "Ha az újságíró cselekményei vagy tartalma a tulajdonos vagy a hatóságok érdekeit szolgálja, nem pedig a közvéleményét.",
-    "sources": [
-      {
-        "law": "CODUL DEONTOLOGIC UNIFICAT",
-        "article": "Art 2.1"
-      }
-    ]
-  },
-  {
-    "id": "CODUL_DEONTOLOGIC_VERIFICAREA",
-    "category": "Szakmai Standardok",
-    "severity": "HIGH",
-    "description": "Az újságíró köteles minden információt legalább két, egymástól független forrásból ellenőrizni, mielőtt közzéteszi. Ésszerű kétely esetén köteles ezt jelezni.",
-    "trigger_logic": "Ha az információ nem ellenőrizve vagy csak egy forrásból származik, és ésszerű kétely esetén nem jelezve.",
-    "sources": [
-      {
-        "law": "CODUL DEONTOLOGIC UNIFICAT",
-        "article": "Art 2.3"
-      }
-    ]
-  },
-  {
-    "id": "CODUL_DEONTOLOGIC_REPLICA",
-    "category": "Szakmai Standardok",
-    "severity": "HIGH",
-    "description": "A kritizált félnek meg kell adni a válaszadás jogát.",
-    "trigger_logic": "Ha a kritizált félnek nem adtak lehetőséget a válaszadásra.",
-    "sources": [
-      {
-        "law": "CODUL DEONTOLOGIC UNIFICAT",
-        "article": "Art 3.2"
-      }
-    ]
-  },
-  {
-    "id": "HITLESSÉG_ÉS_FÜGGETLENSÉG",
-    "category": "Belső Szabályzat",
-    "severity": "HIGH",
-    "description": "Az uh.ro célja, hogy hitelesen és szabadon mesélje el a történeteket, politikai és gazdasági befolyástól mentesen.",
-    "trigger_logic": "Ha egy cikk politikai vagy gazdasági befolyás jeleket mutat.",
-    "sources": [
-      {
-        "law": "uh.ro Misszió és Alapelvek",
-        "article": "1. Alapelv"
-      }
-    ]
-  },
-  {
-    "id": "KÖZÖSSÉGI_SZOLGÁLAT",
-    "category": "Belső Szabályzat",
-    "severity": "HIGH",
-    "description": "A portál a helyi közösség érdekeit szolgálja, nem hatalmi érdekeket.",
-    "trigger_logic": "Ha egy cikk hatalmi érdekeket szolgál vagy a helyi közösség érdekeit nem szolgálja.",
-    "sources": [
-      {
-        "law": "uh.ro Misszió és Alapelvek",
-        "article": "2. Alapelv"
-      }
-    ]
-  },
-  {
-    "id": "TÉNYALAPÚ_ÚJSÁGÍRÁS",
-    "category": "Belső Szabályzat",
-    "severity": "HIGH",
-    "description": "Az oldal elkötelezett a valóság feltárása mellett, szemben a puszta véleményvezérléssel.",
-    "trigger_logic": "Ha egy cikk puszta véleményvezérlés vagy nem alapul ténylegesen feltárt tényekre.",
-    "sources": [
-      {
-        "law": "uh.ro Misszió és Alapelvek",
-        "article": "3. Alapelv"
-      }
-    ]
-  },
-  {
-    "id": "ÁTLÁTHATÓSÁG",
-    "category": "Belső Szabályzat",
-    "severity": "MEDIUM",
-    "description": "Az olvasókkal szembeni korrektség megköveteli, hogy ami reklám vagy vélemény, az annak is legyen jelölve.",
-    "trigger_logic": "Ha egy cikk nem jelöli ki megfelelően a reklámokat vagy véleményeket.",
-    "sources": [
-      {
-        "law": "uh.ro Misszió és Alapelvek",
-        "article": "4. Alapelv"
-      }
-    ]
-  },
-  {
-    "id": "MANIPULATÍV_ÉS_EGYOLDALÚ_TARTALOM",
-    "category": "Belső Szabályzat",
-    "severity": "CRITICAL",
-    "description": "Ha egy cikk az uh.ro-n manipulatív, egyoldalú, vagy bizonyítatlan pletykát közöl, az nemcsak etikai vétség, hanem 'Saját Misszió Elleni Vétség' (Inkonzisztencia).",
-    "trigger_logic": "Ha egy cikk manipulatív, egyoldalú, vagy bizonyítatlan pletykákat tartalmaz.",
-    "sources": [
-      {
-        "law": "uh.ro Misszió és Alapelvek",
-        "article": "Audit Szempont"
-      }
-    ]
-  },
-  {
-    "id": "BOTRÁNY_KULCSSZÓ",
-    "category": "Belső Szabályzat",
-    "severity": "HIGH",
-    "description": "A 'botrány' kulcsszó a szerzőknél a témaválasztásra vonatkozhat (leleplezés), de nem mentesít a hitelességi követelmények alól.",
-    "trigger_logic": "Ha egy cikk 'botrány' témakörben megjelenik, de nem tartja be a hitelességi követelményeket.",
-    "sources": [
-      {
-        "law": "uh.ro Misszió és Alapelvek",
-        "article": "Audit Szempont"
-      }
+      { "law": "uh.ro Misszió", "article": "Alapelvek" }
     ]
   }
 ]
