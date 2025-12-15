@@ -1,5 +1,6 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
+const { getStore } = require('@netlify/blobs'); // v2.1 Cache
 
 // --- 1. JOGI MÁTRIX BETÖLTÉSE ---
 let fullLegalMatrix = [];
@@ -173,6 +174,36 @@ exports.handler = async (event, context) => {
 
             const targetUrl = body.url.toLowerCase();
 
+            // --- v2.1 CACHE LOGIKA (Netlify Blobs) ---
+            // 30 napos cache idő
+            const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; 
+            const cacheKey = Buffer.from(targetUrl).toString('base64').replace(/[^a-zA-Z0-9]/g, ''); // URL -> Base64 -> Safe Filename
+            let store;
+            
+            try {
+                store = getStore({ name: 'analysis_cache', siteID: process.env.NETLIFY_SITE_ID, token: process.env.NETLIFY_AUTH_TOKEN });
+                const cachedEntry = await store.get(cacheKey, { type: 'json' });
+
+                if (cachedEntry && cachedEntry.timestamp) {
+                    const age = Date.now() - cachedEntry.timestamp;
+                    if (age < CACHE_TTL_MS) {
+                        console.log(`[CACHE] HIT! URL: ${targetUrl}, Age: ${Math.round(age / 1000 / 60)} min`);
+                        // Visszaadjuk a tárolt eredményt
+                        return { statusCode: 200, body: JSON.stringify(cachedEntry.data) };
+                    } else {
+                        console.log(`[CACHE] EXPIRED! URL: ${targetUrl}, Age: ${Math.round(age / 1000 / 60 / 60 / 24)} days`);
+                        // Lejárt, de törölni nem feltétlen kell, felülírjuk majd
+                    }
+                } else {
+                    console.log(`[CACHE] MISS! URL: ${targetUrl}`);
+                }
+            } catch (cacheError) {
+                console.warn("[CACHE] Hiba a blob store elérésekor:", cacheError.message);
+                // Nem állunk meg, megyünk tovább az élő elemzéssel
+            }
+            // ------------------------------------------
+
+
             // --- 1. SZABÁLYSZŰRÉS ÉS BIZTONSÁGI BESZÚRÁS ---
             
             // a) Metaadatok kinyerése (v2 Dynamic DB)
@@ -217,7 +248,7 @@ KÖTELEZŐ INSTRUKCIÓK A JSON KIMENETHEZ:
 FIGYELEM: A válaszod KIZÁRÓLAG a nyers JSON objektum legyen!
 NE írj bevezető szöveget (pl. "Itt van a JSON...").
 NE írj lezáró szöveget.
-NE használj markdown formázást (\`\\\`json).
+NE használj markdown formázást (pl. json kodblokk).
 CSAK A { ... } TARTALOM KELL!
 
 KIMENET: Valid JSON.
@@ -239,7 +270,7 @@ KIMENET: Valid JSON.
   ],
   "rewritten_article": {
     "neutral_headline": "Cím javaslat", 
-    "neutral_body_html": "HTML szöveg" 
+    "neutral_body_html": "HTML szöveg"
   }
 }`;
 
@@ -389,6 +420,17 @@ KIMENET: Valid JSON.
                 rewritten_article: finalRewrite
             };
             
+            // --- v2.1 CACHE MENTÉS ---
+            try {
+                if(store) {
+                    await store.setJSON(cacheKey, { timestamp: Date.now(), data: finalResult });
+                    console.log(`[CACHE] SAVED! URL: ${targetUrl}`);
+                }
+            } catch (saveError) {
+                console.warn("[CACHE] Hiba a mentéskor:", saveError.message);
+            }
+            // ------------------------
+
             console.log(`✅ SIKERES AGGREGÁCIÓ (v2): ${successfulResults.length} modell. Minority: ${minorityReport ? 'VAN' : 'NINCS'}`);
             return { statusCode: 200, body: JSON.stringify(finalResult) };
 
