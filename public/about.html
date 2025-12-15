@@ -12,6 +12,11 @@
         .section-title { position: relative; padding-left: 1rem; }
         .section-title::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #3b82f6; border-radius: 2px; }
         .step-number { font-size: 3rem; font-weight: 800; color: #eff6ff; -webkit-text-stroke: 1px #bfdbfe; line-height: 1; margin-bottom: -0.5rem; }
+        /* Layout Fallback */
+        .max-w-6xl { max-width: 72rem; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
     </style>
 </head>
 <body class="text-slate-800">
@@ -199,9 +204,9 @@
 
     </main>
 
-    <footer class="bg-white border-t border-slate-200 mt-12 py-8">
-        <div class="max-w-6xl mx-auto px-4 text-center">
-            <p class="text-slate-500 text-sm">© 2025 NewsDistill Engine. Minden jog fenntartva.</p>
+    <footer class="mt-auto bg-white border-t border-gray-100 py-8">
+        <div class="max-w-6xl mx-auto px-6 text-center">
+            <p class="text-xs text-gray-500">© LemonScript | Citrom Média Kft. - Szőke László. Minden jog fenntartva.</p>
         </div>
     </footer>
 

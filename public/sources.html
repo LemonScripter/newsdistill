@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <title>Jogi és Etikai Forrástár - NewsDistill</title>
+    <title>Jogi és etikai forrástár - NewsDistill</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -12,6 +12,11 @@
         .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         .section-title { position: relative; padding-left: 1rem; }
         .section-title::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #3b82f6; border-radius: 2px; }
+        /* Layout Fallback */
+        .max-w-6xl { max-width: 72rem; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; } /* sources.html px-4-et használ */
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
     </style>
 </head>
 <body class="text-slate-800">
@@ -266,10 +271,10 @@
 
     </main>
 
-    <footer class="bg-white border-t border-slate-200 mt-12 py-8">
-        <div class="max-w-6xl mx-auto px-4 text-center">
-            <p class="text-slate-500 text-sm">© 2025 NewsDistill Engine. Minden jog fenntartva. | LemondScript - Citrom Média Kft.</p>
-            <p class="text-slate-400 text-xs mt-2">A fenti linkek külső forrásokra mutatnak, tartalmukért felelősséget nem vállalunk.</p>
+    <footer class="mt-auto bg-white border-t border-gray-100 py-8">
+        <div class="max-w-6xl mx-auto px-6 text-center">
+            <p class="text-xs text-gray-500">© LemonScript | Citrom Média Kft. - Szőke László. Minden jog fenntartva.</p>
+            <p class="text-[10px] text-gray-300 mt-4">A fenti linkek külső forrásokra mutatnak, tartalmukért felelősséget nem vállalunk.</p>
         </div>
     </footer>
 

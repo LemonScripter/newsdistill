@@ -12,6 +12,29 @@
         .gauge-circle { transition: stroke-dashoffset 1s ease-in-out; }
         .fade-in { animation: fadeIn 0.5s ease-in; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* Layout Fallback */
+        .max-w-6xl { max-width: 72rem; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        
+        /* Visual Audit Highlights */
+        mark.audit-highlight { 
+            background-color: rgba(254, 240, 138, 0.5); /* yellow-200 opacity */
+            color: #422006; 
+            padding: 0 0.1em;
+            border-radius: 0.2em;
+            cursor: help;
+            border-bottom: 2px solid #eab308;
+            transition: all 0.2s;
+        }
+        mark.audit-highlight:hover { background-color: rgba(254, 240, 138, 1); }
+        
+        mark.audit-highlight.high-risk {
+            background-color: rgba(254, 202, 202, 0.5); /* red-200 opacity */
+            color: #7f1d1d;
+            border-bottom: 2px solid #ef4444;
+        }
+        mark.audit-highlight.high-risk:hover { background-color: rgba(254, 202, 202, 1); }
     </style>
 </head>
 <body class="text-gray-800 flex flex-col min-h-screen">
@@ -145,6 +168,7 @@
         <div class="flex justify-center mb-6">
             <div class="bg-gray-200 p-1 rounded-lg inline-flex flex-wrap justify-center gap-1 shadow-inner">
                 <button onclick="setTab('analysis')" id="btn-analysis" class="px-5 py-2 rounded-md text-sm font-medium transition-all bg-white text-gray-900 shadow-sm flex items-center gap-2"><i data-lucide="alert-triangle" class="w-4 h-4"></i> Hibák</button>
+                <button onclick="setTab('visual')" id="btn-visual" class="px-5 py-2 rounded-md text-sm font-medium transition-all text-gray-500 hover:text-gray-900 flex items-center gap-2"><i data-lucide="eye" class="w-4 h-4"></i> Vizuális</button>
                 <button onclick="setTab('legal')" id="btn-legal" class="px-5 py-2 rounded-md text-sm font-medium transition-all text-gray-500 hover:text-gray-900 flex items-center gap-2"><i data-lucide="gavel" class="w-4 h-4"></i> Törvénytár</button>
                 <button onclick="setTab('rewrite')" id="btn-rewrite" class="px-5 py-2 rounded-md text-sm font-medium transition-all text-gray-500 hover:text-gray-900 flex items-center gap-2"><i data-lucide="wand-2" class="w-4 h-4"></i> Javított</button>
             </div>
@@ -152,6 +176,22 @@
 
         <div id="tab-analysis" class="space-y-6 fade-in"><div id="flags-container" class="space-y-4"></div></div>
         
+        <div id="tab-visual" class="hidden fade-in">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-indigo-50 px-6 py-4 border-b border-indigo-100 flex justify-between items-center">
+                    <h3 class="text-indigo-900 font-semibold flex items-center gap-2"><i data-lucide="eye" class="w-5 h-5"></i> Vizuális Audit</h3>
+                    <span class="text-xs text-indigo-600 bg-indigo-100 px-2 py-1 rounded">BETA</span>
+                </div>
+                <div class="p-16 text-center" id="visual-content">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-50 mb-6">
+                        <i data-lucide="construction" class="w-8 h-8 text-indigo-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">A funkció fejlesztés alatt áll</h3>
+                    <p class="text-gray-500 max-w-md mx-auto">A vizuális ellenőrző modul jelenleg karbantartás és finomhangolás alatt áll. Kérjük, használja a "Hibák" és "Törvénytár" füleket az eredmények megtekintéséhez.</p>
+                </div>
+            </div>
+        </div>
+
         <div id="tab-rewrite" class="hidden fade-in">
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="bg-green-50 px-6 py-4 border-b border-green-100 flex justify-between items-center">
@@ -188,8 +228,7 @@
 
     <footer class="mt-12 bg-white border-t border-gray-100 py-8 w-full">
         <div class="max-w-6xl mx-auto px-6 text-center">
-            <p class="text-gray-600 font-semibold mb-2">Citrom Média Kft. - Szőke László</p>
-            <p class="text-xs text-gray-400">&copy; 2025 NewsDistill Engine. Minden jog fenntartva.</p>
+            <p class="text-xs text-gray-500">© LemonScript | Citrom Média Kft. - Szőke László. Minden jog fenntartva.</p>
         </div>
     </footer>
 
@@ -558,15 +597,57 @@
                 document.getElementById('neutral-body').innerHTML = data.rewritten_article.neutral_body_html || "<p class='text-gray-400 italic'>Nincs elérhető tartalom.</p>";
             } else document.getElementById('neutral-body').innerHTML = "<p class='text-gray-400 italic text-center p-4'>Ehhez a cikkhez nem készült javított verzió.</p>";
 
+            /* 
+            // --- VIZUÁLIS AUDIT RENDERELÉS (Ideiglenesen kikapcsolva) ---
+            if (data.article_html) {
+                let visualHtml = data.article_html;
+                
+                // Highlight Logic (Deduplikált)
+                const processedSegments = new Set();
+                flags.forEach(flag => {
+                    if (!flag.original_segment || flag.original_segment.length < 5) return;
+                    if (processedSegments.has(flag.original_segment)) return;
+                    processedSegments.add(flag.original_segment);
+                    
+                    const isHighRisk = ['RED', 'CRITICAL', 'HIGH'].includes((flag.severity || "").toUpperCase());
+                    const className = isHighRisk ? "audit-highlight high-risk" : "audit-highlight";
+                    const titleText = `${flag.violation_id}: ${cleanText(flag.explanation).replace(/<[^>]*>?/gm, '')}`.substring(0, 300);
+                    
+                    try {
+                        const safeSegment = flag.original_segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        const regex = new RegExp(safeSegment, 'g'); 
+                        visualHtml = visualHtml.replace(regex, `<mark class="${className}" title="${titleText}">$&</mark>`);
+                    } catch (e) { console.warn("Highlight regex error:", e); }
+                });
+
+                // READER VIEW FEJLÉC ÉPÍTÉSE
+                const readerHeader = `
+                    <div class="mb-8 border-b border-gray-100 pb-6">
+                        <h1 class="text-3xl font-bold text-gray-900 mb-4 leading-tight">${pageMeta.title || "Cím nem található"}</h1>
+                        <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 uppercase tracking-wide font-semibold">
+                            <span class="text-indigo-600">${pageMeta.domain || "Ismeretlen forrás"}</span>
+                            <span class="text-gray-300">•</span>
+                            <span>${pageMeta.author || "Ismeretlen szerző"}</span>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('visual-content').innerHTML = readerHeader + visualHtml;
+
+            } else {
+                document.getElementById('visual-content').innerHTML = "<p class='text-gray-500 italic p-4'>Ehhez az elemzéshez nem érhető el a vizuális nézet (pl. régi elemzés vagy sikertelen letöltés).</p>";
+            }
+            */
+
             lucide.createIcons();
         }
 
         function setTab(tabName) {
-            ['analysis', 'rewrite', 'legal'].forEach(t => document.getElementById('tab-' + t).classList.add('hidden'));
+            ['analysis', 'rewrite', 'legal', 'visual'].forEach(t => document.getElementById('tab-' + t).classList.add('hidden'));
             const activeTab = document.getElementById('tab-' + tabName);
             activeTab.classList.remove('hidden');
             activeTab.classList.add('fade-in'); 
-            const btns = ['btn-analysis', 'btn-rewrite', 'btn-legal'];
+            const btns = ['btn-analysis', 'btn-rewrite', 'btn-legal', 'btn-visual'];
             btns.forEach(b => {
                  const btn = document.getElementById(b);
                  btn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all bg-white text-gray-500 hover:text-gray-900 border border-transparent flex items-center gap-2";
@@ -574,6 +655,7 @@
             const activeBtn = document.getElementById('btn-' + tabName);
             if(tabName === 'legal') activeBtn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all text-purple-700 bg-purple-50 border border-purple-200 shadow-sm flex items-center gap-2";
             else if (tabName === 'rewrite') activeBtn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all text-green-700 bg-green-50 border border-green-200 shadow-sm flex items-center gap-2";
+            else if (tabName === 'visual') activeBtn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all text-indigo-700 bg-indigo-50 border border-indigo-200 shadow-sm flex items-center gap-2";
             else activeBtn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all text-blue-700 bg-blue-50 border border-blue-200 shadow-sm flex items-center gap-2";
         }
     </script>

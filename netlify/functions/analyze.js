@@ -21,10 +21,10 @@ try {
 const getProviders = () => [
     {
         id: 'GEMINI',
-        name: 'Google Gemini (Flash 1.5)',
+        name: 'Google Gemini (Flash 2.0)',
         key: process.env.GEMINI_API_KEY,
-        url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
-        model: 'gemini-1.5-flash',
+        url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
+        model: 'gemini-2.0-flash',
         temperature: 0.1
     },
     {
@@ -179,27 +179,42 @@ exports.handler = async (event, context) => {
             const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; 
             const cacheKey = Buffer.from(targetUrl).toString('base64').replace(/[^a-zA-Z0-9]/g, ''); // URL -> Base64 -> Safe Filename
             let store;
+            let cacheStatus = "MISS"; // Default status
+            let cacheErrorMsg = ""; // Debug info
             
             try {
-                store = getStore({ name: 'analysis_cache', siteID: process.env.NETLIFY_SITE_ID, token: process.env.NETLIFY_AUTH_TOKEN });
+                // EXPLICIT konfigra váltunk vissza, mert az auto-konfig nem találta a tokent.
+                // A NETLIFY_SITE_ID és NETLIFY_AUTH_TOKEN változókat be kell állítani a Site Settings-ben!
+                store = getStore({ 
+                    name: 'analysis_cache', 
+                    siteID: process.env.NETLIFY_SITE_ID || "c6b64a57-d64a-4d36-9bc4-9f959e0fc4a9", // Fallback ID
+                    token: process.env.NETLIFY_AUTH_TOKEN 
+                });
+                
                 const cachedEntry = await store.get(cacheKey, { type: 'json' });
 
                 if (cachedEntry && cachedEntry.timestamp) {
                     const age = Date.now() - cachedEntry.timestamp;
                     if (age < CACHE_TTL_MS) {
                         console.log(`[CACHE] HIT! URL: ${targetUrl}, Age: ${Math.round(age / 1000 / 60)} min`);
+                        cacheStatus = "HIT";
                         // Visszaadjuk a tárolt eredményt
-                        return { statusCode: 200, body: JSON.stringify(cachedEntry.data) };
+                        return { 
+                            statusCode: 200, 
+                            headers: { 'X-Cache-Status': 'HIT' },
+                            body: JSON.stringify(cachedEntry.data) 
+                        };
                     } else {
                         console.log(`[CACHE] EXPIRED! URL: ${targetUrl}, Age: ${Math.round(age / 1000 / 60 / 60 / 24)} days`);
-                        // Lejárt, de törölni nem feltétlen kell, felülírjuk majd
+                        cacheStatus = "EXPIRED";
                     }
                 } else {
                     console.log(`[CACHE] MISS! URL: ${targetUrl}`);
                 }
             } catch (cacheError) {
                 console.warn("[CACHE] Hiba a blob store elérésekor:", cacheError.message);
-                // Nem állunk meg, megyünk tovább az élő elemzéssel
+                cacheStatus = "ERROR";
+                cacheErrorMsg = cacheError.message;
             }
             // ------------------------------------------
 
@@ -294,6 +309,126 @@ KIMENET: Valid JSON.
             const domain = new URL(targetUrl).hostname.replace('www.', '');
 
             let content = $('article').text().trim() || $('div.entry-content').text().trim() || $('p').text().trim();
+            
+            // --- ÚJ: HTML KINYERÉSE VIZUÁLIS AUDITHOZ (SMART SELECTOR) ---
+            
+            // 1. Agresszív tisztítás: Eltávolítjuk a tipikus "zaj" elemeket a DOM-ból
+            const trashSelectors = [
+                'script', 'style', 'iframe', 'object', 'embed', 'form', 'button', 'input', 
+                'nav', 'footer', 'header', 'aside', 
+                '.sidebar', '#sidebar', '.widget', '.ad', '.advertisement', '.banner',
+                '.comments', '#comments', '.comment-section', '.related-posts', '.related-articles',
+                '.menu', '.navigation', '.nav', '.cookie-consent', '.popup', '.subscribe',
+                '.social-share', '.share-buttons', '.author-bio' // Opcionális: szerződoboz maradhat? Inkább vegyük ki a tiszta cikkhez.
+            ];
+            $(trashSelectors.join(', ')).remove();
+            
+            // Lehetséges tartalom konténerek
+            const candidates = [
+                'article',
+                'div.entry-content',
+                'div.main-content',
+                'div.post-content',
+                'div.article-body',
+                'div#content',
+                'main',
+                'body'
+            ];
+
+            let $content = null;
+            let maxLength = 0;
+
+            candidates.forEach(selector => {
+                const el = $(selector).first();
+                if (el.length > 0) {
+                    // Tisztítás a hosszmérés előtt (hogy a szemét ne számítson bele)
+                    const clone = el.clone(); // Klónozzuk, hogy ne rontsuk el az eredetit, ha még kellene
+                    const textLen = clone.text().trim().length;
+                    
+                    if (textLen > maxLength) {
+                        maxLength = textLen;
+                        $content = el; // Itt az eredeti elemet mentjük el, majd azt tisztítjuk
+                    }
+                }
+            });
+
+            let articleHtml = "";
+
+            if ($content) {
+                // --- READER MODE TISZTÍTÁS (WHITELIST ALAPÚ) ---
+                // Nem törölgetünk, hanem KIVÁLOGATJUK a hasznos elemeket.
+                // Ez a legbiztosabb módszer a "zaj" (menük, div-ek, span-ok) ellen.
+                
+                let cleanHtmlBuilder = [];
+                
+                // Végigmegyünk a konténer gyermekein (vagy mélyebben?) 
+                // A find('*') túl sok lenne, a find('p, h2...') viszont elveszti a sorrendet, ha nem vigyázunk.
+                // A legjobb: a konténer összes leszármazottját vizsgáljuk, és csak a whitelist-eseket tartjuk meg, 
+                // DE a sorrendet meg kell őrizni.
+                
+                // Egyszerűbb megközelítés: Kikeressük az összes releváns elemet, és összefűzzük őket.
+                // Hátrány: Ha egy <ul> egy <div>-ben van, és a <div>-et eldobjuk, a find() megtalálja az <ul>-t? Igen.
+                // De ha van egy 'Kapcsolódó cikkek' doboz tele <p>-kkel, az bekerülhet.
+                // Ezért először a durva tisztítás (amit már megcsináltunk a trashSelectors-szal) fontos volt.
+                
+                // Még egy kör tisztítás a $content-en belül, mielőtt kiválogatjuk:
+                $content.find('.author-bio, .share, .tags, .meta, .breadcrumbs, .cookies').remove();
+
+                const whitelistSelectors = 'p, h2, h3, h4, h5, h6, ul, ol, blockquote';
+                
+                $content.find(whitelistSelectors).each((i, el) => {
+                    const $el = $(el);
+                    const text = $el.text().trim();
+                    
+                    // Szűrés: Üres elemek kuka
+                    if (text.length < 2) return; 
+                    
+                    // Szűrés: Túl rövid <p>, ami valószínűleg nem bekezdés (pl. "Hirdetés", "Szerző:", dátum)
+                    if (el.tagName === 'p' && text.length < 15 && !text.endsWith('.') && !text.endsWith('?')) return;
+
+                    // Szűrés: Linkekkel teli lista vagy bekezdés (pl. Menü vagy Kapcsolódó cikkek)
+                    const linkCount = $el.find('a').length;
+                    const textLen = text.length;
+                    // Ha a szöveg több mint fele link, akkor az valószínűleg navigáció/ajánló
+                    if (linkCount > 0 && ($el.text().length / linkCount < 30)) return; 
+
+                    // Szűrés: Kulcsszavas Blacklist (Reklámok, ajánlók kiszűrése)
+                    const lowerText = text.toLowerCase();
+                    const badWords = [
+                        'kapcsolódó', 'ajánlott', 'olvassa el', 'ez is érdekelhet', 'még több cikk', 
+                        'hirdetés', 'reklám', 'x', 'iratkozzon fel', 'kövessen minket', 'támogassa', 
+                        'forrás:', 'fotó:', 'kép:', 'videó:', 'címkék:', 'szerző:', 'megosztás'
+                    ];
+                    // Csak akkor dobjuk el, ha rövid a szöveg (ne dobjuk el a cikk egy mondatát, ami véletlenül tartalmazza a szót)
+                    if (textLen < 100 && badWords.some(w => lowerText.includes(w))) return;
+
+                    // Attribútumok törlése (kivéve href)
+                    const tagName = el.tagName.toLowerCase();
+                    let attributes = "";
+                    
+                    // Linkek megőrzése a szövegen belül
+                    let innerHtml = $el.html();
+                    
+                    // A belső tartalmat is meg kell tisztítani attribútumoktól? 
+                    // Igen, de a Cheerio html() visszaadja a belső tageket (pl. <b>, <a>).
+                    // Most egyszerűsítsünk: Csak a taget építjük újra.
+                    
+                    // Biztonsági tisztítás a belső HTML-en: csak inline elemek maradjanak (b, i, u, a, span)
+                    // De a $el.html() már tartalmazza ezeket. 
+                    // Ha nagyon precízek akarunk lenni, újra kéne parse-olni, de bízzunk benne, hogy a trashSelectors kiszedte a durva dolgokat.
+                    
+                    cleanHtmlBuilder.push(`<${tagName}>${innerHtml}</${tagName}>`);
+                });
+
+                articleHtml = cleanHtmlBuilder.join('\n');
+            }
+            
+            if (!articleHtml || articleHtml.length < 100) {
+                 console.warn("[Scrape] HTML tartalom gyanúsan rövid.");
+                 // Ha minden kötél szakad, és a body-t már próbáltuk (de rövid volt?), akkor visszaküldjük a raw body-t fallbackként
+                 if (!articleHtml) articleHtml = $('body').html() || "<div class='p-4'>Nem sikerült kinyerni a tartalmat.</div>";
+            }
+
             const truncatedContent = content.substring(0, 25000);
             const userPrompt = `CÍM: ${title}\nSZERZŐ: ${author}\n\nTARTALOM (Részlet):\n${truncatedContent}`;
 
@@ -408,6 +543,7 @@ KIMENET: Valid JSON.
 
             const finalResult = {
                 metadata: { title, author, domain, url: targetUrl },
+                article_html: articleHtml, // Vizuális audit tartalom
                 db_version_date: dbVersionDate,
                 ui_meta: {
                     risk_level: finalRisk,
@@ -432,7 +568,17 @@ KIMENET: Valid JSON.
             // ------------------------
 
             console.log(`✅ SIKERES AGGREGÁCIÓ (v2): ${successfulResults.length} modell. Minority: ${minorityReport ? 'VAN' : 'NINCS'}`);
-            return { statusCode: 200, body: JSON.stringify(finalResult) };
+            
+            const responseHeaders = { 'X-Cache-Status': cacheStatus };
+            if (cacheStatus === 'ERROR' && cacheErrorMsg) {
+                responseHeaders['X-Cache-Error'] = cacheErrorMsg;
+            }
+
+            return { 
+                statusCode: 200, 
+                headers: responseHeaders,
+                body: JSON.stringify(finalResult) 
+            };
 
         } catch (error) {
             console.error("HANDLER CRASH:", error.message);
@@ -442,7 +588,7 @@ KIMENET: Valid JSON.
                     ui_meta: {
                         risk_level: "ERROR",
                         objectivity_score: 0,
-                        verdict_summary: "A cikk feldolgozása során váratlan hiba történt. Kérjük ellenőrizze az URL-t, vagy próbálja újra később."
+                        verdict_summary: "DEBUG ERROR: " + error.message // Temporary for debugging
                     },
                     flags: [],
                     rewritten_article: null
