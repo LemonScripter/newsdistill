@@ -15,16 +15,23 @@
 </head>
 <body class="text-gray-800 flex flex-col min-h-screen">
     <nav class="border-b border-gray-100 bg-white/80 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-6 h-24 flex items-center justify-between">
+        <div class="max-w-6xl mx-auto px-6 h-auto md:h-24 flex flex-wrap items-center justify-between py-4 md:py-0">
             <div class="flex items-center gap-2">
                 <a href="index.html">
-                    <img src="logo.png" alt="NewsDistill Logo" class="h-20 w-auto">
+                    <img src="logo.png" alt="NewsDistill Logo" class="h-16 md:h-20 w-auto">
                 </a>
             </div>
-            <div class="flex items-center gap-6">
-                <a href="about.html" class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">Működés</a>
-                <a href="sources.html" class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">Forrástár</a>
-                <span class="text-xs text-gray-400 border-l pl-6 py-1">v2.0.0</span>
+            
+            <button id="mobile-menu-btn" class="md:hidden p-2 text-gray-600 focus:outline-none">
+                <i data-lucide="menu" class="w-8 h-8"></i>
+            </button>
+
+            <div id="mobile-menu" class="hidden w-full md:block md:w-auto mt-4 md:mt-0">
+                <div class="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 pb-4 md:pb-0">
+                    <a href="about.html" class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">Működés</a>
+                    <a href="sources.html" class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">Forrástár</a>
+                    <span class="text-xs text-gray-400 border-l-0 md:border-l pl-0 md:pl-6 py-1">v2.0.0</span>
+                </div>
             </div>
         </div>
     </nav>
@@ -126,6 +133,17 @@
     </div>
     <script>
         lucide.createIcons();
+        
+        // Mobile menu toggle
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        if(menuBtn && mobileMenu) {
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+
         function startAnalysis() {
             const url = document.getElementById('url-input').value;
             const overlay = document.getElementById('loading-overlay');
