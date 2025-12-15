@@ -18,4 +18,3 @@ netlify/functions/analyze_backup_*.js
 *.rtf
 
 # Project management
-project_status.md

@@ -177,20 +177,27 @@ exports.handler = async (event, context) => {
             // --- v2.1 CACHE LOGIKA (Netlify Blobs) ---
             // 30 napos cache idő
             const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; 
+            const DAILY_LIMIT = 15; // Napi globális elemzési limit (Költségkontroll)
+
             const cacheKey = Buffer.from(targetUrl).toString('base64').replace(/[^a-zA-Z0-9]/g, ''); // URL -> Base64 -> Safe Filename
+            
+            // Napi számláló kulcsa (pl. daily_usage_2025-12-15)
+            const todayStr = new Date().toISOString().split('T')[0];
+            const usageKey = `daily_usage_${todayStr}`;
+
             let store;
             let cacheStatus = "MISS"; // Default status
             let cacheErrorMsg = ""; // Debug info
             
             try {
-                // EXPLICIT konfigra váltunk vissza, mert az auto-konfig nem találta a tokent.
-                // A NETLIFY_SITE_ID és NETLIFY_AUTH_TOKEN változókat be kell állítani a Site Settings-ben!
+                // EXPLICIT konfigra váltunk vissza, mert az auto-konfiguráció néha instabil
                 store = getStore({ 
                     name: 'analysis_cache', 
-                    siteID: process.env.NETLIFY_SITE_ID || "c6b64a57-d64a-4d36-9bc4-9f959e0fc4a9", // Fallback ID
+                    siteID: process.env.NETLIFY_SITE_ID || "c6b64a57-d64a-4d36-9bc4-9f959e0fc4a9", 
                     token: process.env.NETLIFY_AUTH_TOKEN 
                 });
                 
+                // 1. CACHE ELLENŐRZÉS (Ha cache-ből jön, az NEM számít bele a napi limitbe, mert ingyen van!)
                 const cachedEntry = await store.get(cacheKey, { type: 'json' });
 
                 if (cachedEntry && cachedEntry.timestamp) {
@@ -198,23 +205,47 @@ exports.handler = async (event, context) => {
                     if (age < CACHE_TTL_MS) {
                         console.log(`[CACHE] HIT! URL: ${targetUrl}, Age: ${Math.round(age / 1000 / 60)} min`);
                         cacheStatus = "HIT";
-                        // Visszaadjuk a tárolt eredményt
                         return { 
                             statusCode: 200, 
                             headers: { 'X-Cache-Status': 'HIT' },
                             body: JSON.stringify(cachedEntry.data) 
                         };
                     } else {
-                        console.log(`[CACHE] EXPIRED! URL: ${targetUrl}, Age: ${Math.round(age / 1000 / 60 / 60 / 24)} days`);
                         cacheStatus = "EXPIRED";
                     }
                 } else {
                     console.log(`[CACHE] MISS! URL: ${targetUrl}`);
                 }
+
+                // 2. RATE LIMIT ELLENŐRZÉS (Csak ha NINCS cache, és újat kell generálni)
+                const usageData = await store.get(usageKey, { type: 'json' }) || { count: 0 };
+                console.log(`[LIMIT] Napi használat: ${usageData.count} / ${DAILY_LIMIT}`);
+
+                if (usageData.count >= DAILY_LIMIT) {
+                    console.warn("[LIMIT] Napi limit elérve!");
+                    return {
+                        statusCode: 429, // Too Many Requests
+                        body: JSON.stringify({
+                            ui_meta: {
+                                risk_level: "ERROR",
+                                objectivity_score: 0,
+                                verdict_summary: `⚠️ ELÉRTÜK A NAPI LIMITET!\n\nA rendszer biztonsági okokból és a költségek kontrollálása miatt korlátozott számú új cikket elemez naponta. A mai keret sajnos elfogyott.\n\nKérjük, térjen vissza holnap reggel 9:00 után! (A már elemzett cikkek továbbra is megnyithatók).`
+                            },
+                            flags: [],
+                            rewritten_article: null
+                        })
+                    };
+                }
+
+                // Számláló növelése (Optimista, race condition előfordulhat, de itt nem kritikus)
+                await store.setJSON(usageKey, { count: usageData.count + 1 });
+
             } catch (cacheError) {
-                console.warn("[CACHE] Hiba a blob store elérésekor:", cacheError.message);
+                console.warn("[CACHE/LIMIT] Hiba a blob store elérésekor:", cacheError.message);
                 cacheStatus = "ERROR";
                 cacheErrorMsg = cacheError.message;
+                // Ha hiba van a Store-ral, akkor "Open Bar" van (átengedjük), vagy tiltsuk?
+                // Inkább átengedjük, ne álljon le a szolgáltatás konfigurációs hiba miatt.
             }
             // ------------------------------------------
 

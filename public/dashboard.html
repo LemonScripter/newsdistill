@@ -370,8 +370,18 @@
                 const response = await fetch('/.netlify/functions/analyze', {
                     method: 'POST', body: JSON.stringify({ url: url }), headers: { 'Content-Type': 'application/json' }
                 });
-                if (!response.ok) throw new Error("Szerver hiba");
-                const data = await response.json();
+                
+                const data = await response.json(); // Megpróbáljuk mindenképp parse-olni
+                
+                if (!response.ok) {
+                    // Ha a backend küldött strukturált hibaüzenetet (pl. Rate Limit), azt használjuk
+                    if (data && data.ui_meta && data.ui_meta.verdict_summary) {
+                        renderDashboard(data); // Rendereljük a hiba-objektumot
+                        return;
+                    }
+                    throw new Error(`Szerver hiba (${response.status})`);
+                }
+                
                 renderDashboard(data);
             } catch (error) { renderErrorState(error.message); } 
             finally { document.getElementById('loading-overlay').classList.add('hidden'); }
