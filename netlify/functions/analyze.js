@@ -115,12 +115,6 @@ RULES for author_legally_responsible:
 - false → claim_type is INDIRECT_QUOTE with UNCERTAINTY marker (author is distancing themselves)
 - AMBIGUOUS → when you genuinely cannot determine responsibility
 
-ANALYSIS CONFIDENCE scoring guide:
-- 0.9: Clear journalism, mostly identified direct/indirect quotes, minimal ambiguity
-- 0.7: Moderate ambiguity, some free indirect discourse present
-- 0.5: Heavy use of free indirect discourse, rhetorical framing, unclear attribution
-- 0.3: Mostly opinion/editorial, nearly impossible to separate author voice from subject voice
-
 OUTPUT RULES:
 - Return ONLY a valid JSON object. No markdown. No preamble. No trailing text.
 - Extract maximum 15 most legally significant attribution_map entries.
@@ -156,7 +150,6 @@ OUTPUT SCHEMA:
       "risk_note": "why this is legally risky"
     }
   ],
-  "analysis_confidence": 0.75
 }`;
 
 // --- SEGÉDFÜGGVÉNYEK ---
@@ -169,6 +162,88 @@ function extractJSON(str) {
     }
     console.warn("[extractJSON] NEM találtam JSON objektumot a válaszban!");
     return cleaned;
+}
+
+// --- DETERMINISTIKUS SZEMANTIKAI KONFIDENCIA-SZÁMÍTÁS ---
+// Az AI-t kivesszük az önértékelésből — a kinyert adatokból számítunk objektív értéket.
+function calculateSemanticConfidence(semanticMap, contentLength) {
+    if (!semanticMap) return null;
+
+    let score = 1.0;
+    const penalties = [];
+
+    const attributionMap   = semanticMap.attribution_map || [];
+    const fidCandidates    = semanticMap.free_indirect_discourse_candidates || [];
+    const epistemicMarkers = semanticMap.epistemic_markers || [];
+    const totalClaims      = Math.max(attributionMap.length, 1);
+
+    // 1. Szabad függő beszéd (FID) — minden szegmens 8%-ot von le, max -24%
+    if (fidCandidates.length > 0) {
+        const p = Math.min(fidCandidates.length * 0.08, 0.24);
+        score -= p;
+        penalties.push(`FID szegmens (${fidCandidates.length} db): -${Math.round(p * 100)}%`);
+    }
+
+    // 2. UNKNOWN típusú attribúciók aránya — legfeljebb -30%
+    const unknownClaims = attributionMap.filter(c => !c.claim_type || c.claim_type === 'UNKNOWN').length;
+    if (unknownClaims > 0) {
+        const p = (unknownClaims / totalClaims) * 0.30;
+        score -= p;
+        penalties.push(`Ismeretlen attribúció-típus (${unknownClaims}/${totalClaims}): -${Math.round(p * 100)}%`);
+    }
+
+    // 3. Bizonytalan jogi felelősség (author_legally_responsible nincs kitöltve) — max -20%
+    const ambiguousClaims = attributionMap.filter(c =>
+        c.author_legally_responsible === null || c.author_legally_responsible === undefined
+    ).length;
+    if (ambiguousClaims > 0) {
+        const p = (ambiguousClaims / totalClaims) * 0.20;
+        score -= p;
+        penalties.push(`Bizonytalan felelősség (${ambiguousClaims} állítás): -${Math.round(p * 100)}%`);
+    }
+
+    // 4. Nincs azonosítható diskurzus-alany — -10%
+    const subject = (semanticMap.discourse_subject || '').toLowerCase().trim();
+    if (!subject || subject === 'ismeretlen' || subject === 'unknown' || subject === '') {
+        score -= 0.10;
+        penalties.push('Nincs diskurzus-alany: -10%');
+    }
+
+    // 5. Kevés attribúció hosszú szövegben — scraping vagy parsing probléma — -20%
+    if (attributionMap.length < 3 && contentLength > 1500) {
+        score -= 0.20;
+        penalties.push(`Kevés attribúció (${attributionMap.length}) hosszú szövegben: -20%`);
+    }
+
+    // 6. Implicit értékelő jelölők (rejtett szerzői hang) — 3%/db, max -15%
+    const implicitCount = epistemicMarkers.filter(m =>
+        (m.dictionary_category || m.category) === 'IMPLICIT_ÉRTÉKELŐ'
+    ).length;
+    if (implicitCount > 0) {
+        const p = Math.min(implicitCount * 0.03, 0.15);
+        score -= p;
+        penalties.push(`Implicit értékelő jelölő (${implicitCount} db): -${Math.round(p * 100)}%`);
+    }
+
+    // 7. Amplifikáló jelölők (manipulatív retorika) — 2%/db, max -10%
+    const ampCount = epistemicMarkers.filter(m =>
+        (m.dictionary_category || m.category) === 'AMPLIFIKÁLÓ'
+    ).length;
+    if (ampCount > 0) {
+        const p = Math.min(ampCount * 0.02, 0.10);
+        score -= p;
+        penalties.push(`Amplifikáló jelölő (${ampCount} db): -${Math.round(p * 100)}%`);
+    }
+
+    // 8. Bónusz: sok jól azonosított attribúció — +5%
+    if (attributionMap.length >= 10) {
+        score += 0.05;
+        penalties.push('Gazdag attribúciós térkép (10+ bejegyzés): +5%');
+    }
+
+    const final = Math.round(Math.max(0.10, Math.min(1.0, score)) * 100) / 100;
+    console.log(`[Konfidencia] ${Math.round(final * 100)}% | ${penalties.join(' | ') || 'Levonás nélkül'}`);
+    return final;
 }
 
 async function callAIProvider(providerConfig, prompt, systemPrompt) {
@@ -584,6 +659,11 @@ exports.handler = async (event, context) => {
             // ================================================================
             const semanticMap = await runPhase1SemanticExtraction(content, title, author);
             const enrichedSemanticMap = enrichEpistemicMarkers(semanticMap);
+
+            // Deterministikus konfidencia-számítás (felülírja az AI önértékelését)
+            if (enrichedSemanticMap) {
+                enrichedSemanticMap.analysis_confidence = calculateSemanticConfidence(enrichedSemanticMap, content.length);
+            }
 
             // Elemzési megbízhatóság értékelése
             const phase1Confidence = enrichedSemanticMap?.analysis_confidence ?? null;
