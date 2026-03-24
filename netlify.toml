@@ -10,3 +10,11 @@
   from = "/api/analyze"
   to = "/.netlify/functions/analyze"
   status = 200
+
+[[redirects]]
+  from = "/api/admin"
+  to = "/.netlify/functions/admin"
+  status = 200
+
+[functions."learn"]
+  schedule = "0 3 * * *"

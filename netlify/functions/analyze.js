@@ -354,8 +354,8 @@ async function runPhase1SemanticExtraction(content, title, author) {
     }
 }
 
-// --- EPISZTEMIKUS GAZDAGÍTÁS (szótárral keresztreferencia) ---
-function enrichEpistemicMarkers(semanticMap) {
+// --- EPISZTEMIKUS GAZDAGÍTÁS (szótárral keresztreferencia + admin override-ok) ---
+function enrichEpistemicMarkers(semanticMap, ruleOverrides = {}) {
     if (!semanticMap || !semanticMap.epistemic_markers) return semanticMap;
 
     // Szótárból felépítjük a gyors keresési indexet
@@ -373,6 +373,20 @@ function enrichEpistemicMarkers(semanticMap) {
 
     semanticMap.epistemic_markers = semanticMap.epistemic_markers.map(marker => {
         const key = (marker.term || '').toLowerCase();
+
+        // 1. Prioritás: admin override
+        const override = ruleOverrides[key];
+        if (override) {
+            return {
+                ...marker,
+                dictionary_category: override.correct_category,
+                legal_weight: override.correct_legal_weight || 'MEDIUM',
+                ui_color: null,
+                category_label: override.admin_note || `Admin: ${override.correct_category}`
+            };
+        }
+
+        // 2. Szótár lookup
         const lookup = termIndex[key];
         if (lookup) {
             return {
@@ -383,16 +397,26 @@ function enrichEpistemicMarkers(semanticMap) {
                 category_label: lookup.label
             };
         }
-        // A modell talált valamit, ami nincs a szótárban – megőrizzük, jelöljük
+
+        // 3. Ismeretlen – gyűjtjük tanuláshoz
         return { ...marker, dictionary_category: 'UNKNOWN', legal_weight: 'UNKNOWN', category_label: 'Ismeretlen típus' };
     });
 
     return semanticMap;
 }
 
-// --- PHASE 2 RENDSZER-PROMPT GENERÁTOR (jogi mátrix + szemantikai kontextus) ---
-function buildPhase2SystemPrompt(rulesText, semanticMap) {
+// --- PHASE 2 RENDSZER-PROMPT GENERÁTOR (jogi mátrix + szemantikai kontextus + domain profil) ---
+function buildPhase2SystemPrompt(rulesText, semanticMap, domainProfile = null) {
     const hasSemanticMap = semanticMap && semanticMap.attribution_map && semanticMap.attribution_map.length > 0;
+
+    const domainSection = domainProfile && domainProfile.analysis_count >= 3 ? `
+DOMAIN ELŐZMÉNY-PROFIL (${domainProfile.domain} – ${domainProfile.analysis_count} korábbi elemzés alapján):
+- Jellemző kockázati szint: ${domainProfile.dominant_risk}
+- Átlagos objektivitás: ${domainProfile.avg_objectivity_score}/100
+- Nagy divergencia arány: ${Math.round(domainProfile.high_divergence_rate * 100)}%
+- Átlagos flag-szám: ${domainProfile.avg_flag_count}
+INSTRUKCIÓ: Ez kontextuális háttér, NEM befolyásolja a döntést – az aktuális cikk tartalma alapján ítélj.
+` : '';
 
     const semanticSection = hasSemanticMap ? `
 
@@ -422,7 +446,7 @@ Figyelmeztetés: Az attribúciós felelősség meghatározása korlátozottabb p
 
     return `SZEREP: Te egy Szigorú Médiajogi Auditor (Forensic Media Auditor) vagy.
 FELADAT: Elemezd a cikket a lenti SZABÁLYKÖNYV alapján.
-${semanticSection}
+${domainSection}${semanticSection}
 
 SZABÁLYKÖNYV:
 ${rulesText}
@@ -501,12 +525,33 @@ exports.handler = async (event, context) => {
             const usageKey = `daily_usage_${todayStr}`;
 
             let store;
+            let learningStore;
+            let domainProfileStore;
+            let overrideStore;
             let cacheStatus = "MISS";
             let cacheErrorMsg = "";
 
             try {
                 store = getStore({
                     name: 'analysis_cache',
+                    siteID: process.env.NETLIFY_SITE_ID || "c6b64a57-d64a-4d36-9bc4-9f959e0fc4a9",
+                    token: process.env.NETLIFY_AUTH_TOKEN
+                });
+
+                learningStore = getStore({
+                    name: 'learning_signals',
+                    siteID: process.env.NETLIFY_SITE_ID || "c6b64a57-d64a-4d36-9bc4-9f959e0fc4a9",
+                    token: process.env.NETLIFY_AUTH_TOKEN
+                });
+
+                domainProfileStore = getStore({
+                    name: 'domain_profiles',
+                    siteID: process.env.NETLIFY_SITE_ID || "c6b64a57-d64a-4d36-9bc4-9f959e0fc4a9",
+                    token: process.env.NETLIFY_AUTH_TOKEN
+                });
+
+                overrideStore = getStore({
+                    name: 'rule_overrides',
                     siteID: process.env.NETLIFY_SITE_ID || "c6b64a57-d64a-4d36-9bc4-9f959e0fc4a9",
                     token: process.env.NETLIFY_AUTH_TOKEN
                 });
@@ -657,8 +702,27 @@ exports.handler = async (event, context) => {
             // ================================================================
             // --- 3. PHASE 1: SZEMANTIKAI KINYERÉS (Groq, szekvenciális) ---
             // ================================================================
+
+            // Rule overrides betöltése (szótárbővítések az admin panelről)
+            let ruleOverrides = {};
+            if (overrideStore) {
+                try {
+                    const { blobs: overrideBlobs } = await overrideStore.list();
+                    const overrideEntries = await Promise.all(
+                        overrideBlobs.map(b => overrideStore.get(b.key, { type: 'json' }).catch(() => null))
+                    );
+                    overrideEntries.filter(Boolean).forEach(o => {
+                        if (o.term) ruleOverrides[o.term.toLowerCase()] = o;
+                    });
+                    if (Object.keys(ruleOverrides).length > 0)
+                        console.log(`[Overrides] ${Object.keys(ruleOverrides).length} override betöltve`);
+                } catch (e) {
+                    console.warn('[Overrides] Betöltési hiba:', e.message);
+                }
+            }
+
             const semanticMap = await runPhase1SemanticExtraction(content, title, author);
-            const enrichedSemanticMap = enrichEpistemicMarkers(semanticMap);
+            const enrichedSemanticMap = enrichEpistemicMarkers(semanticMap, ruleOverrides);
 
             // Deterministikus konfidencia-számítás (felülírja az AI önértékelését)
             if (enrichedSemanticMap) {
@@ -691,10 +755,25 @@ exports.handler = async (event, context) => {
             // ================================================================
             // --- 4. PHASE 2: PÁRHUZAMOS JOGI AUDIT (Konszenzus Protokoll) ---
             // ================================================================
+
+            // --- DOMAIN PROFIL BETÖLTÉSE (Sprint 2) ---
+            let domainProfile = null;
+            if (domainProfileStore) {
+                try {
+                    domainProfile = await Promise.race([
+                        domainProfileStore.get(`profile_${domain}`, { type: 'json' }),
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 300))
+                    ]);
+                    if (domainProfile) console.log(`[DomainProfile] Betöltve: ${domain} | ${domainProfile.analysis_count} elemzés`);
+                } catch (e) {
+                    console.warn(`[DomainProfile] Nem sikerült (${domain}):`, e.message);
+                }
+            }
+
             // Phase 2 rövidebb szöveget kap (15k char) – a szemantikai térkép már tartalmazza a kulcs állításokat
             const phase2Content = content.substring(0, 15000);
             const phase2UserPrompt = `CÍM: ${title}\nSZERZŐ: ${author}\n\nTARTALOM (Részlet, 15000 karakter):\n${phase2Content}`;
-            const phase2SystemPrompt = buildPhase2SystemPrompt(RULES_TEXT, enrichedSemanticMap);
+            const phase2SystemPrompt = buildPhase2SystemPrompt(RULES_TEXT, enrichedSemanticMap, domainProfile);
 
             const providers = getProviders();
             const activeProviders = providers.filter(p => p.key).slice(0, 5); // Max 5, timeout-biztonság
@@ -810,6 +889,53 @@ exports.handler = async (event, context) => {
                 }
             } catch (saveError) {
                 console.warn("[CACHE] Hiba a mentéskor:", saveError.message);
+            }
+
+            // --- TANULÁSI SZIGNÁL MENTÉSE (fire-and-forget, nem blokkolja a választ) ---
+            if (learningStore) {
+                const riskLevelCounts = { LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0 };
+                riskLevels.forEach(r => { if (riskLevelCounts[r.level] !== undefined) riskLevelCounts[r.level]++; });
+
+                const scoreValues = successfulResults.map(r => r.data.ui_meta?.objectivity_score || 0);
+                const scoreSpread = scoreValues.length > 1 ? Math.max(...scoreValues) - Math.min(...scoreValues) : 0;
+                const highDivergence = scoreSpread > 20 || (
+                    (riskLevelCounts.HIGH + riskLevelCounts.CRITICAL > 0) &&
+                    (riskLevelCounts.LOW + riskLevelCounts.MEDIUM > 0)
+                );
+
+                const unknownMarkers = (enrichedSemanticMap?.epistemic_markers || [])
+                    .filter(m => m.dictionary_category === 'UNKNOWN')
+                    .map(m => ({
+                        term: m.term,
+                        context: (m.context || '').substring(0, 80),
+                        ai_category: m.category || 'UNKNOWN'
+                    }));
+
+                const signalKey = `signal_${new Date().toISOString().replace(/[:.]/g, '-')}_${cacheKey.substring(0, 8)}`;
+                const signalData = {
+                    timestamp: Date.now(),
+                    url: targetUrl,
+                    domain,
+                    model_count: activeProviders.length,
+                    successful_models: successfulResults.map(r => r.provider),
+                    consensus_divergence: {
+                        risk_levels: riskLevelCounts,
+                        final_risk: finalRisk,
+                        avg_objectivity_score: avgScore,
+                        score_spread: scoreSpread,
+                        high_divergence: highDivergence
+                    },
+                    unknown_markers: unknownMarkers,
+                    unknown_marker_count: unknownMarkers.length,
+                    phase1_confidence: phase1Confidence,
+                    phase1_available: phase1Available,
+                    flag_count: combinedFlags.length,
+                    fid_count: (enrichedSemanticMap?.free_indirect_discourse_candidates || []).length
+                };
+
+                learningStore.setJSON(signalKey, signalData)
+                    .then(() => console.log(`[Learn] Szignál mentve: ${signalKey}`))
+                    .catch(e => console.warn("[Learn] Szignál mentési hiba:", e.message));
             }
 
             console.log(`✅ SIKERES AGGREGÁCIÓ (v3): ${successfulResults.length} modell | Phase1: ${phase1Available ? 'OK' : 'SKIP'} | Minority: ${minorityReport ? 'VAN' : 'NINCS'} | Figyelmeztetések: ${analysisWarnings.length}`);

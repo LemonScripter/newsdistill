@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin – NewsDistill</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9; }
+        .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; transition: opacity 0.4s; }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen">
+
+<!-- ===== BEJELENTKEZÉSI KÉPERNYŐ ===== -->
+<div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 w-full max-w-sm">
+        <div class="flex items-center gap-3 mb-6">
+            <a href="index.html"><img src="logo.png" alt="NewsDistill" class="h-10 w-auto"></a>
+            <div>
+                <h1 class="font-extrabold text-slate-900 text-lg">Admin Panel</h1>
+                <p class="text-xs text-slate-400">NewsDistill belső felület</p>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <div>
+                <label class="text-sm font-medium text-slate-700 block mb-1">Felhasználónév</label>
+                <input id="inputUsername" type="text" autocomplete="username"
+                    class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="admin">
+            </div>
+            <div>
+                <label class="text-sm font-medium text-slate-700 block mb-1">Jelszó</label>
+                <input id="inputPassword" type="password" autocomplete="current-password"
+                    class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="••••••••"
+                    onkeydown="if(event.key==='Enter') login()">
+            </div>
+            <div id="loginError" class="hidden text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                Hibás felhasználónév vagy jelszó.
+            </div>
+            <button onclick="login()"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition-colors">
+                Bejelentkezés
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== ADMIN PANEL ===== -->
+<div id="adminPanel" class="hidden">
+
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50 px-6 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <a href="index.html"><img src="logo.png" alt="NewsDistill" class="h-8 w-auto"></a>
+            <span class="font-bold text-slate-700">Admin Panel</span>
+            <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-semibold">BELSŐ</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="refreshAll()" class="flex items-center gap-1 text-sm text-slate-500 hover:text-blue-600">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i> Frissítés
+            </button>
+            <button onclick="logout()" class="flex items-center gap-1 text-sm text-red-500 hover:text-red-700">
+                <i data-lucide="log-out" class="w-4 h-4"></i> Kijelentkezés
+            </button>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+
+        <!-- STATISZTIKÁK -->
+        <section>
+            <h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <i data-lucide="bar-chart-2" class="w-5 h-5 text-blue-600"></i> Összesített statisztikák
+            </h2>
+            <div id="statsCards" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white rounded-xl border border-slate-200 p-4 text-center animate-pulse">
+                    <div class="h-8 bg-slate-100 rounded mb-2"></div><div class="h-4 bg-slate-100 rounded w-3/4 mx-auto"></div>
+                </div>
+                <div class="bg-white rounded-xl border border-slate-200 p-4 text-center animate-pulse">
+                    <div class="h-8 bg-slate-100 rounded mb-2"></div><div class="h-4 bg-slate-100 rounded w-3/4 mx-auto"></div>
+                </div>
+                <div class="bg-white rounded-xl border border-slate-200 p-4 text-center animate-pulse">
+                    <div class="h-8 bg-slate-100 rounded mb-2"></div><div class="h-4 bg-slate-100 rounded w-3/4 mx-auto"></div>
+                </div>
+                <div class="bg-white rounded-xl border border-slate-200 p-4 text-center animate-pulse">
+                    <div class="h-8 bg-slate-100 rounded mb-2"></div><div class="h-4 bg-slate-100 rounded w-3/4 mx-auto"></div>
+                </div>
+            </div>
+
+            <!-- Domainek táblázat -->
+            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <div class="px-5 py-3 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
+                    <i data-lucide="globe" class="w-4 h-4 text-slate-500"></i>
+                    <span class="font-semibold text-slate-700 text-sm">Domain profilok</span>
+                </div>
+                <div id="domainsTable" class="overflow-x-auto">
+                    <p class="text-sm text-slate-400 p-5">Betöltés...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- UNKNOWN MARKEREK -->
+        <section>
+            <h2 class="text-xl font-bold text-slate-900 mb-2 flex items-center gap-2">
+                <i data-lucide="tag" class="w-5 h-5 text-orange-500"></i> Ismeretlen episztemikus markerek
+            </h2>
+            <p class="text-sm text-slate-500 mb-4">Ezeket az AI talált, de a szótárban nem szerepelnek. Rendelj kategóriát, hogy a rendszer legközelebb helyesen kezelje.</p>
+
+            <!-- Mentett override-ok -->
+            <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="font-semibold text-green-800 text-sm flex items-center gap-1">
+                        <i data-lucide="check-circle" class="w-4 h-4"></i> Jóváhagyott override-ok
+                    </span>
+                    <button onclick="loadOverrides()" class="text-xs text-green-600 hover:underline">Frissítés</button>
+                </div>
+                <div id="overridesList" class="text-sm text-green-700">Betöltés...</div>
+            </div>
+
+            <div id="unknownMarkersTable" class="space-y-3">
+                <p class="text-sm text-slate-400">Betöltés...</p>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast hidden">
+    <div id="toastContent" class="bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm font-medium"></div>
+</div>
+
+<script>
+// --- STATE ---
+let _auth = '';
+
+// --- BEJELENTKEZÉS ---
+function login() {
+    const user = document.getElementById('inputUsername').value.trim();
+    const pass = document.getElementById('inputPassword').value;
+    if (!user || !pass) return;
+    _auth = 'Basic ' + btoa(user + ':' + pass);
+
+    fetch('/api/admin?action=stats', { headers: { Authorization: _auth } })
+        .then(r => {
+            if (r.status === 401) {
+                document.getElementById('loginError').classList.remove('hidden');
+                _auth = '';
+                return null;
+            }
+            return r.json();
+        })
+        .then(data => {
+            if (!data) return;
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('adminPanel').classList.remove('hidden');
+            lucide.createIcons();
+            renderStats(data);
+            loadUnknownMarkers();
+            loadOverrides();
+        })
+        .catch(() => {
+            document.getElementById('loginError').classList.remove('hidden');
+            _auth = '';
+        });
+}
+
+function logout() {
+    _auth = '';
+    document.getElementById('adminPanel').classList.add('hidden');
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('loginError').classList.add('hidden');
+    document.getElementById('inputPassword').value = '';
+}
+
+function refreshAll() {
+    fetch('/api/admin?action=stats', { headers: { Authorization: _auth } })
+        .then(r => r.json()).then(renderStats);
+    loadUnknownMarkers();
+    loadOverrides();
+}
+
+// --- STATS RENDERELÉS ---
+function renderStats(data) {
+    const cards = [
+        { label: 'Összes elemzés', value: data.total_signals, icon: 'file-text', color: 'blue' },
+        { label: 'Átl. objektivitás', value: (data.avg_objectivity_score || 0) + '%', icon: 'gauge', color: 'teal' },
+        { label: 'Nagy divergencia', value: data.high_divergence_count, icon: 'git-branch', color: 'orange' },
+        { label: 'Ismeretlen markerek', value: data.unique_unknown_terms, icon: 'tag', color: 'red' }
+    ];
+
+    const colorMap = {
+        blue: 'text-blue-600 bg-blue-50',
+        teal: 'text-teal-600 bg-teal-50',
+        orange: 'text-orange-600 bg-orange-50',
+        red: 'text-red-600 bg-red-50'
+    };
+
+    document.getElementById('statsCards').innerHTML = cards.map(c => `
+        <div class="bg-white rounded-xl border border-slate-200 p-4 text-center">
+            <div class="inline-flex items-center justify-center w-10 h-10 rounded-full ${colorMap[c.color]} mb-2">
+                <i data-lucide="${c.icon}" class="w-5 h-5"></i>
+            </div>
+            <div class="text-2xl font-extrabold text-slate-900">${c.value}</div>
+            <div class="text-xs text-slate-500 mt-0.5">${c.label}</div>
+        </div>
+    `).join('');
+
+    // Domainek táblázat
+    const domains = data.domains || {};
+    const rows = Object.entries(domains).sort((a,b) => b[1].count - a[1].count);
+    if (rows.length === 0) {
+        document.getElementById('domainsTable').innerHTML = '<p class="text-sm text-slate-400 p-5">Még nincsenek domain adatok.</p>';
+    } else {
+        document.getElementById('domainsTable').innerHTML = `
+            <table class="w-full text-sm">
+                <thead><tr class="bg-slate-50 text-slate-500 text-xs uppercase">
+                    <th class="px-4 py-2 text-left">Domain</th>
+                    <th class="px-4 py-2 text-right">Elemzések</th>
+                    <th class="px-4 py-2 text-right">Átl. pont</th>
+                    <th class="px-4 py-2 text-right">Nagy divergencia</th>
+                </tr></thead>
+                <tbody class="divide-y divide-slate-100">
+                    ${rows.map(([d, v]) => `
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-2 font-mono text-slate-700">${d}</td>
+                            <td class="px-4 py-2 text-right font-semibold">${v.count}</td>
+                            <td class="px-4 py-2 text-right">${v.avg_score}%</td>
+                            <td class="px-4 py-2 text-right text-orange-600">${v.high_divergence_count}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    lucide.createIcons();
+}
+
+// --- UNKNOWN MARKEREK ---
+function loadUnknownMarkers() {
+    fetch('/api/admin?action=unknown_markers', { headers: { Authorization: _auth } })
+        .then(r => r.json())
+        .then(renderUnknownMarkers);
+}
+
+function renderUnknownMarkers(data) {
+    const markers = data.markers || [];
+    const container = document.getElementById('unknownMarkersTable');
+
+    if (markers.length === 0) {
+        container.innerHTML = '<p class="text-sm text-slate-400 bg-white rounded-xl border border-slate-200 p-5">Nincs ismeretlen marker – a szótár teljes.</p>';
+        return;
+    }
+
+    const categories = ['BIZONYTALAN', 'BIZONYOS', 'IMPLICIT_ÉRTÉKELŐ', 'AMPLIFIKÁLÓ'];
+    const weights = ['LOW', 'MEDIUM', 'HIGH'];
+
+    container.innerHTML = markers.map((m, i) => {
+        const topVote = Object.entries(m.ai_category_votes || {}).sort((a,b) => b[1]-a[1])[0];
+        const suggestedCat = topVote ? topVote[0] : 'BIZONYTALAN';
+        return `
+        <div class="bg-white rounded-xl border border-slate-200 p-5">
+            <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
+                <div>
+                    <span class="font-mono font-bold text-slate-900 text-base">"${m.term}"</span>
+                    <span class="ml-2 text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded font-semibold">${m.occurrences}× előfordulás</span>
+                    <span class="ml-1 text-xs text-slate-400">— ${m.domains.join(', ')}</span>
+                </div>
+                <div class="text-xs text-slate-400">AI javaslat: <strong>${suggestedCat}</strong></div>
+            </div>
+            ${m.contexts.length > 0 ? `
+                <div class="bg-slate-50 rounded-lg px-3 py-2 mb-3 text-xs text-slate-600 italic space-y-1">
+                    ${m.contexts.map(c => `<div>"...${c}..."</div>`).join('')}
+                </div>` : ''}
+            <div class="flex flex-wrap gap-2 items-end">
+                <div>
+                    <label class="text-xs text-slate-500 block mb-1">Kategória</label>
+                    <select id="cat_${i}" class="border border-slate-300 rounded-lg px-2 py-1 text-sm">
+                        ${categories.map(c => `<option value="${c}" ${c === suggestedCat ? 'selected' : ''}>${c}</option>`).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-slate-500 block mb-1">Jogi súly</label>
+                    <select id="weight_${i}" class="border border-slate-300 rounded-lg px-2 py-1 text-sm">
+                        ${weights.map(w => `<option value="${w}" ${w === 'MEDIUM' ? 'selected' : ''}>${w}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="flex-1 min-w-[150px]">
+                    <label class="text-xs text-slate-500 block mb-1">Megjegyzés (opcionális)</label>
+                    <input id="note_${i}" type="text" placeholder="Pl. régi sajtófordulat..."
+                        class="w-full border border-slate-300 rounded-lg px-2 py-1 text-sm">
+                </div>
+                <button onclick="submitFeedback('${m.term}', ${i})"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1">
+                    <i data-lucide="save" class="w-3.5 h-3.5"></i> Mentés
+                </button>
+                <span id="saved_${i}" class="hidden text-xs text-green-600 font-semibold flex items-center gap-1">
+                    <i data-lucide="check" class="w-3 h-3"></i> Mentve
+                </span>
+            </div>
+        </div>
+        `;
+    }).join('');
+
+    lucide.createIcons();
+}
+
+// --- VISSZAJELZÉS BEKÜLDÉSE ---
+function submitFeedback(term, idx) {
+    const cat = document.getElementById(`cat_${idx}`)?.value;
+    const weight = document.getElementById(`weight_${idx}`)?.value;
+    const note = document.getElementById(`note_${idx}`)?.value || '';
+
+    fetch('/api/admin?action=feedback', {
+        method: 'POST',
+        headers: { Authorization: _auth, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ term, correct_category: cat, correct_legal_weight: weight, admin_note: note })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.ok) {
+            document.getElementById(`saved_${idx}`)?.classList.remove('hidden');
+            showToast(`"${term}" → ${cat} kategóriába mentve`);
+            loadOverrides();
+        }
+    })
+    .catch(() => showToast('Hiba a mentésnél!', true));
+}
+
+// --- OVERRIDE-OK LISTÁJA ---
+function loadOverrides() {
+    fetch('/api/admin?action=overrides', { headers: { Authorization: _auth } })
+        .then(r => r.json())
+        .then(data => {
+            const list = data.overrides || [];
+            const el = document.getElementById('overridesList');
+            if (list.length === 0) {
+                el.innerHTML = '<span class="text-green-600">Még nincsenek jóváhagyott override-ok.</span>';
+                return;
+            }
+            el.innerHTML = `<div class="flex flex-wrap gap-2">` +
+                list.map(o => `
+                    <span class="inline-flex items-center gap-1 bg-green-100 text-green-800 rounded-full px-3 py-0.5 text-xs font-mono">
+                        "${o.term}" → ${o.correct_category}
+                        <button onclick="deleteOverride('${o.term}')" class="ml-1 text-green-500 hover:text-red-600">×</button>
+                    </span>
+                `).join('') +
+                `</div>`;
+        });
+}
+
+function deleteOverride(term) {
+    if (!confirm(`Töröljük az override-ot: "${term}"?`)) return;
+    fetch(`/api/admin?action=override_delete&term=${encodeURIComponent(term)}`, {
+        method: 'DELETE',
+        headers: { Authorization: _auth }
+    })
+    .then(r => r.json())
+    .then(() => { showToast(`"${term}" override törölve`); loadOverrides(); });
+}
+
+// --- TOAST ---
+function showToast(msg, isError = false) {
+    const toast = document.getElementById('toast');
+    const content = document.getElementById('toastContent');
+    content.className = `${isError ? 'bg-red-600' : 'bg-green-600'} text-white px-4 py-2 rounded-lg shadow-lg text-sm font-medium`;
+    content.textContent = msg;
+    toast.classList.remove('hidden');
+    setTimeout(() => toast.classList.add('hidden'), 3000);
+}
+
+// Ikonok init
+lucide.createIcons();
+</script>
+</body>
+</html>
