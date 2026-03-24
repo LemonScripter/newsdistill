@@ -1,0 +1,86 @@
+{
+  "version": "1.0",
+  "language": "hu",
+  "description": "Magyar episztemikus jelölők szótára újságírói szövegelemzéshez.",
+  "categories": {
+    "BIZONYTALAN": {
+      "label": "Bizonytalansági jelölő",
+      "description": "A szerző nem garantálja az állítás igazságát – forrás vagy bizonyíték nincs mögötte.",
+      "legal_weight": "LOW",
+      "ui_color": "yellow",
+      "terms": [
+        "állítólag", "állítása szerint", "feltételezhetően", "feltehető",
+        "úgy tudni", "úgy hírlik", "szárnyra kapott a hír",
+        "forrásaink szerint", "forrásunk szerint", "értesüléseink szerint",
+        "bennfentes értesülések szerint", "bennfentes forrásból",
+        "névtelen forrás szerint", "ismeretlen forrásból", "informátorunk szerint",
+        "tudomásunk szerint", "egyes vélemények szerint",
+        "egyes értelmezések szerint", "vélekedések szerint",
+        "hírek szerint", "az a vélekedés járja", "pletykák szerint",
+        "úgy tűnik", "látszólag", "feltehetőleg", "valószínűleg",
+        "valószínűsíthető", "lehetséges, hogy", "nem zárható ki", "nem kizárt",
+        "nem tudni", "nem világos", "kérdéses", "vitatott",
+        "megkérdőjelezhető", "kétséges", "nem bizonyított", "nem igazolt",
+        "igazolhatatlan", "nem megerősített", "meg nem erősített",
+        "tagadja", "cáfolja", "vitatja", "nem erősítette meg"
+      ]
+    },
+    "BIZONYOS": {
+      "label": "Bizonyossági jelölő",
+      "description": "A szerző tényként kezeli az állítást – jogerős ítélet, elismerés, bizonyított tény kontextusában.",
+      "legal_weight": "HIGH",
+      "ui_color": "blue",
+      "terms": [
+        "elismerte", "beismerte", "bevallotta", "kijelentette",
+        "megerősítette", "nyilatkozott", "közölte", "bejelentette",
+        "leszögezte", "hangsúlyozta", "jogerősen", "jogerős ítélet",
+        "jogerős bírói döntés", "bizonyítottan", "bizonyított",
+        "tényszerűen", "tény, hogy", "megállapítást nyert",
+        "igazoltan", "igazolt", "dokumentáltan", "dokumentált",
+        "bűnös", "elítélt", "elmarasztalt", "határozat szerint",
+        "ítélet szerint", "bírósági döntés szerint", "határozatban rögzített",
+        "kétségtelen", "kétségtelenül", "vitathatatlanul",
+        "tagadhatatlanul", "egyértelműen", "tényszerű"
+      ]
+    },
+    "IMPLICIT_ÉRTÉKELŐ": {
+      "label": "Implicit értékelő jelölő",
+      "description": "A szerző saját értékítéletét rejti el látszólagos tényállítás mögé – rejtett szerzői hang.",
+      "legal_weight": "MEDIUM",
+      "ui_color": "orange",
+      "terms": [
+        "nyilván", "nyilvánvalóan", "nyilvánvaló",
+        "természetesen", "természetszerűleg", "magától értetődően",
+        "magától értetődő", "köztudomású", "köztudott",
+        "mindenki tudja", "nem kell magyarázni",
+        "nem meglepő", "nem meglepő módon", "nem véletlenül",
+        "meglepő módon", "meglepetésre", "szinte törvényszerűen",
+        "törvényszerű", "szükségszerűen", "szükségszerű",
+        "elkerülhetetlenül", "elkerülhetetlen",
+        "logikusan", "logikus", "érthető módon", "érthető",
+        "persze", "természetes", "hát persze", "pontosan",
+        "jellemzően", "jellemző módon", "tipikusan",
+        "mint mindig", "megint csak", "megint", "ismét"
+      ]
+    },
+    "AMPLIFIKÁLÓ": {
+      "label": "Amplifikáló jelölő",
+      "description": "Felerősíti az állítást, negatív konnotációt adhat – manipulatív retorika eszköze.",
+      "legal_weight": "MEDIUM",
+      "ui_color": "red",
+      "terms": [
+        "sőt", "sőt mi több", "ráadásul", "mégis", "pedig",
+        "ennek ellenére", "mindennek ellenére", "dacára", "ellenére",
+        "ám", "azonban", "holott", "noha", "miközben",
+        "annak ellenére, hogy", "s mindezt", "és mindezt",
+        "ehhez még", "tetézi", "tetézi mindezt", "fokozza",
+        "tovább súlyosbítja", "nem is akármennyire",
+        "különösen", "kifejezetten", "határozottan", "erőteljesen",
+        "elsöprő", "döbbenetes", "megdöbbentő", "botrányos",
+        "felháborító", "elképesztő", "hihetetlen", "elszomorító",
+        "aggasztó", "drámai", "súlyos következményekkel",
+        "kirívó", "exempláris", "szembetűnő", "szembeötlő"
+      ]
+    }
+  }
+}

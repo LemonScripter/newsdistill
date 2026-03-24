@@ -18,3 +18,5 @@ netlify/functions/analyze_backup_*.js
 *.rtf
 
 # Project management
+# Claude Code belső fájlok (nem kerülhet GitHub-ra)
+.claude/

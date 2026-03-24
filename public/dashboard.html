@@ -96,6 +96,17 @@
                 </div>
             </div>
 
+            <!-- v3: Elemzési minőség figyelmeztetések -->
+            <div id="analysis-warnings-box" class="hidden mb-4 bg-slate-50 border border-slate-200 rounded-lg p-4">
+                <div class="flex items-start gap-3">
+                    <i data-lucide="info" class="h-4 w-4 text-slate-500 shrink-0 mt-0.5"></i>
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">Elemzési minőségi figyelmeztetések</h3>
+                        <ul id="analysis-warnings-list" class="text-xs text-slate-500 space-y-0.5 list-disc list-inside"></ul>
+                    </div>
+                </div>
+            </div>
+
             <!-- v2: Kisebbségi jelentés (Minority Report) Figyelmeztetés -->
             <div id="minority-report-box" class="hidden mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-md">
                 <div class="flex items-start">
@@ -131,6 +142,9 @@
                     <!-- v2: Adatbázis Frissesség -->
                     <span id="db-status" class="hidden ml-auto flex items-center gap-1 px-2 py-0.5 rounded bg-gray-100 text-gray-400 text-[10px] normal-case tracking-normal">
                         <i data-lucide="database" class="w-3 h-3"></i> Jogtár: <span id="db-date">...</span>
+                    </span>
+                    <span id="semantic-confidence-badge" class="hidden items-center gap-1 px-2 py-0.5 rounded text-[10px] normal-case tracking-normal ml-2">
+                        <i data-lucide="brain" class="w-3 h-3"></i> Szemantika: <span id="semantic-confidence-value">...</span>
                     </span>
                 </div>
                 
@@ -168,6 +182,7 @@
         <div class="flex justify-center mb-6">
             <div class="bg-gray-200 p-1 rounded-lg inline-flex flex-wrap justify-center gap-1 shadow-inner">
                 <button onclick="setTab('analysis')" id="btn-analysis" class="px-5 py-2 rounded-md text-sm font-medium transition-all bg-white text-gray-900 shadow-sm flex items-center gap-2"><i data-lucide="alert-triangle" class="w-4 h-4"></i> Hibák</button>
+                <button onclick="setTab('attribution')" id="btn-attribution" class="px-5 py-2 rounded-md text-sm font-medium transition-all text-gray-500 hover:text-gray-900 flex items-center gap-2"><i data-lucide="git-branch" class="w-4 h-4"></i> Attribúció</button>
                 <button onclick="setTab('visual')" id="btn-visual" class="px-5 py-2 rounded-md text-sm font-medium transition-all text-gray-500 hover:text-gray-900 flex items-center gap-2"><i data-lucide="eye" class="w-4 h-4"></i> Vizuális</button>
                 <button onclick="setTab('legal')" id="btn-legal" class="px-5 py-2 rounded-md text-sm font-medium transition-all text-gray-500 hover:text-gray-900 flex items-center gap-2"><i data-lucide="gavel" class="w-4 h-4"></i> Törvénytár</button>
                 <button onclick="setTab('rewrite')" id="btn-rewrite" class="px-5 py-2 rounded-md text-sm font-medium transition-all text-gray-500 hover:text-gray-900 flex items-center gap-2"><i data-lucide="wand-2" class="w-4 h-4"></i> Javított</button>
@@ -175,20 +190,76 @@
         </div>
 
         <div id="tab-analysis" class="space-y-6 fade-in"><div id="flags-container" class="space-y-4"></div></div>
-        
+
+        <!-- TAB: ATTRIBÚCIÓS TÉRKÉP -->
+        <div id="tab-attribution" class="hidden fade-in space-y-6">
+            <!-- Alany és konfidencia kártya -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-teal-50 px-6 py-4 border-b border-teal-100 flex items-center justify-between">
+                    <h3 class="text-teal-900 font-semibold flex items-center gap-2">
+                        <i data-lucide="git-branch" class="w-5 h-5"></i> Attribúciós térkép
+                        <span class="text-xs text-teal-600 bg-teal-100 px-2 py-0.5 rounded ml-1">KI MONDJA – KINEK – MIT</span>
+                    </h3>
+                    <span id="attribution-confidence-label" class="hidden text-xs text-teal-700 bg-teal-100 px-2 py-1 rounded font-bold"></span>
+                </div>
+                <div class="px-6 py-4 border-b border-gray-100 flex items-center gap-4">
+                    <span class="text-xs font-bold uppercase tracking-wide text-gray-400">A cikk elsődleges alanya:</span>
+                    <span id="discourse-subject" class="text-base font-semibold text-gray-800">—</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-gray-50 text-gray-500 uppercase font-bold text-xs">
+                            <tr>
+                                <th class="px-4 py-3 w-36">Típus</th>
+                                <th class="px-4 py-3 w-36">Nyilatkozó</th>
+                                <th class="px-4 py-3 w-28">Alany</th>
+                                <th class="px-4 py-3">Állítás</th>
+                                <th class="px-4 py-3 w-36">Episztemikus jelölő</th>
+                                <th class="px-4 py-3 w-28 text-center">Szerző felelős?</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attribution-table-body" class="divide-y divide-gray-100"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Szabad függő beszéd figyelmeztetések -->
+            <div id="fid-warnings-container" class="hidden space-y-2">
+                <h3 class="text-sm font-bold uppercase tracking-wide text-orange-700 flex items-center gap-2">
+                    <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                    Szabad függő beszéd – Bizonytalan jogi felelősség
+                </h3>
+                <div id="fid-warnings-list" class="space-y-2"></div>
+            </div>
+
+            <!-- Episztemikus jelölők összesítő -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
+                    <i data-lucide="tag" class="w-4 h-4 text-gray-500"></i>
+                    <h3 class="font-semibold text-gray-700 text-sm">Episztemikus jelölők összesítő</h3>
+                </div>
+                <div id="epistemic-summary" class="p-6 grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+                <div id="epistemic-detail-list" class="px-6 pb-4 hidden">
+                    <h4 class="text-xs font-bold uppercase text-gray-400 tracking-wide mb-2">Részletes lista</h4>
+                    <div id="epistemic-markers-detail" class="flex flex-wrap gap-2"></div>
+                </div>
+            </div>
+        </div>
+
         <div id="tab-visual" class="hidden fade-in">
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="bg-indigo-50 px-6 py-4 border-b border-indigo-100 flex justify-between items-center">
-                    <h3 class="text-indigo-900 font-semibold flex items-center gap-2"><i data-lucide="eye" class="w-5 h-5"></i> Vizuális Audit</h3>
-                    <span class="text-xs text-indigo-600 bg-indigo-100 px-2 py-1 rounded">BETA</span>
-                </div>
-                <div class="p-16 text-center" id="visual-content">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-50 mb-6">
-                        <i data-lucide="construction" class="w-8 h-8 text-indigo-500"></i>
+                <div class="bg-indigo-50 px-6 py-4 border-b border-indigo-100 flex items-center justify-between flex-wrap gap-2">
+                    <h3 class="text-indigo-900 font-semibold flex items-center gap-2">
+                        <i data-lucide="eye" class="w-5 h-5"></i> Vizuális Audit — Reader nézet
+                    </h3>
+                    <div class="flex items-center gap-3">
+                        <span class="flex items-center gap-1.5 text-xs text-gray-500">
+                            <mark class="audit-highlight px-1 rounded">sárga</mark> = etikai probléma
+                            <mark class="audit-highlight high-risk px-1 rounded ml-2">piros</mark> = jogi kockázat
+                        </span>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">A funkció fejlesztés alatt áll</h3>
-                    <p class="text-gray-500 max-w-md mx-auto">A vizuális ellenőrző modul jelenleg karbantartás és finomhangolás alatt áll. Kérjük, használja a "Hibák" és "Törvénytár" füleket az eredmények megtekintéséhez.</p>
                 </div>
+                <div id="visual-content" class="p-8 md:p-12 max-w-3xl mx-auto prose prose-slate text-base leading-relaxed"></div>
             </div>
         </div>
 
@@ -444,8 +515,33 @@
                 contextBox.classList.add('hidden');
             }
 
+            // v3: Szemantikai konfidencia badge
+            const confidenceBadge = document.getElementById('semantic-confidence-badge');
+            const confidenceValue = document.getElementById('semantic-confidence-value');
+            if (meta.phase1_available && meta.semantic_confidence !== null && meta.semantic_confidence !== undefined) {
+                const confPct = Math.round(meta.semantic_confidence * 100);
+                confidenceValue.textContent = confPct + '%';
+                let confClasses = 'bg-green-100 text-green-700';
+                if (meta.semantic_confidence < 0.5) confClasses = 'bg-red-100 text-red-700';
+                else if (meta.semantic_confidence < 0.75) confClasses = 'bg-yellow-100 text-yellow-700';
+                confidenceBadge.className = `flex items-center gap-1 px-2 py-0.5 rounded text-[10px] normal-case tracking-normal ml-2 ${confClasses}`;
+            } else {
+                confidenceBadge.classList.add('hidden');
+            }
+
+            // v3: Elemzési minőségi figyelmeztetések
+            const warningsBox = document.getElementById('analysis-warnings-box');
+            const warningsList = document.getElementById('analysis-warnings-list');
+            const warnings = data.analysis_warnings || [];
+            if (warnings.length > 0) {
+                warningsList.innerHTML = warnings.map(w => `<li>${w}</li>`).join('');
+                warningsBox.classList.remove('hidden');
+            } else {
+                warningsBox.classList.add('hidden');
+            }
+
             // v2: Adatbázis frissesség (Dinamikus)
-            const lastVerified = data.db_version_date || "Ismeretlen"; 
+            const lastVerified = data.db_version_date || "Ismeretlen";
             const dbDateEl = document.getElementById('db-date');
             const dbStatusEl = document.getElementById('db-status');
             
@@ -457,7 +553,7 @@
                  dbStatusEl.className = "ml-auto flex items-center gap-1 px-2 py-0.5 rounded bg-gray-200 text-gray-500 text-[10px]";
             } else {
                 const daysOld = (new Date() - new Date(lastVerified)) / (1000 * 60 * 60 * 24);
-                if (daysOld > 7) {
+                if (daysOld > 30) {
                     dbStatusEl.className = "ml-auto flex items-center gap-1 px-2 py-0.5 rounded bg-red-100 text-red-600 text-[10px] normal-case tracking-normal font-bold";
                     dbDateEl.textContent += " (ELAVULT!)";
                 } else {
@@ -504,7 +600,7 @@
                  flagsContainer.innerHTML = `<div class="p-8 text-center bg-green-50 rounded-xl border border-green-100"><h3 class="text-xl font-bold text-green-900">Tiszta cikk! ✅</h3></div>`;
             }
 
-            flags.forEach(flag => {
+            flags.forEach((flag, flagIndex) => {
                 console.log("Processing flag:", flag); // Debugging
                 const isRed = ['RED', 'CRITICAL', 'HIGH'].includes((flag.severity || "").toUpperCase());
                 
@@ -553,6 +649,7 @@
                 // --- 1. HIBÁK KÁRTYA (Minden megjelenik) ---
                 const card = document.createElement('div');
                 card.className = `bg-white rounded-lg shadow-sm border-l-4 p-5 transition hover:shadow-md ${isRed ? 'border-red-500' : 'border-yellow-400'}`;
+                card.dataset.flagIndex = flagIndex;
                 
                 // Kiemeljük, ha ez UH Misszió sértés!
                 let extraBadge = "";
@@ -649,24 +746,302 @@
             }
             */
 
+            // ================================================================
+            // VIZUÁLIS AUDIT RENDERELÉSE
+            // ================================================================
+            const visualContent = document.getElementById('visual-content');
+
+            if (data.article_html && data.article_html.length > 200) {
+                // Reader view fejléc
+                const readerHeader = `
+                    <div class="mb-8 pb-6 border-b border-gray-100">
+                        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-4 leading-tight">${pageMeta.title || 'Cím nem található'}</h1>
+                        <div class="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                            <span class="font-semibold text-indigo-600">${(pageMeta.domain || '').toUpperCase()}</span>
+                            ${pageMeta.author && pageMeta.author !== 'Ismeretlen szerző' ? `<span class="text-gray-300">•</span><span>${pageMeta.author}</span>` : ''}
+                        </div>
+                    </div>`;
+
+                visualContent.innerHTML = readerHeader + data.article_html;
+
+                // Szövegcsomópont-alapú kiemelő függvény (regex-mentes, HTML-biztonságos)
+                function highlightInDOM(container, searchText, cssClass, tooltipText) {
+                    if (!searchText || searchText.length < 10) return false;
+
+                    // Normalizált keresőszöveg: szóközök összeolvasztása, első 100 karakter
+                    const needle = searchText.replace(/\s+/g, ' ').trim().substring(0, 100).toLowerCase();
+                    if (needle.length < 8) return false;
+
+                    // Összes szövegcsomópont begyűjtése
+                    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
+                    const nodes = [];
+                    let node;
+                    while ((node = walker.nextNode())) nodes.push(node);
+
+                    for (const textNode of nodes) {
+                        const haystack = textNode.textContent.replace(/\s+/g, ' ');
+                        const idx = haystack.toLowerCase().indexOf(needle);
+                        if (idx === -1) continue;
+
+                        // Talált egyezés — feldaraboljuk a szövegcsomópontot
+                        const before = textNode.textContent.substring(0, idx);
+                        const matchText = textNode.textContent.substring(idx, idx + needle.length);
+                        const after = textNode.textContent.substring(idx + needle.length);
+
+                        const mark = document.createElement('mark');
+                        mark.className = cssClass;
+                        mark.title = tooltipText;
+                        mark.textContent = matchText;
+
+                        const parent = textNode.parentNode;
+                        if (!parent) continue;
+                        if (before) parent.insertBefore(document.createTextNode(before), textNode);
+                        parent.insertBefore(mark, textNode);
+                        if (after) parent.insertBefore(document.createTextNode(after), textNode);
+                        parent.removeChild(textNode);
+                        return true; // Csak az első előfordulást jelöljük
+                    }
+                    return false;
+                }
+
+                // Jelzések kiemelése — feldolgozott szegmensek nyilvántartása (deduplikáció)
+                const processedSegments = new Set();
+                let highlightedCount = 0;
+
+                flags.forEach(flag => {
+                    const seg = (flag.original_segment || '').replace(/^undefined/, '').trim();
+                    if (!seg || seg.length < 10 || processedSegments.has(seg)) return;
+                    processedSegments.add(seg);
+
+                    const isHigh = ['RED', 'CRITICAL', 'HIGH'].includes((flag.severity || '').toUpperCase());
+                    const cssClass = isHigh ? 'audit-highlight high-risk' : 'audit-highlight';
+                    const tooltip = cleanText(flag.explanation || '').replace(/<[^>]*>/g, '').substring(0, 200);
+
+                    const found = highlightInDOM(visualContent, seg, cssClass, tooltip);
+                    if (found) highlightedCount++;
+                });
+
+                // Összesítő badge a fejléc mellé
+                if (highlightedCount > 0) {
+                    const badge = document.createElement('div');
+                    badge.className = 'mb-6 flex items-center gap-2 text-sm text-gray-500 bg-gray-50 border border-gray-100 rounded-lg px-4 py-2';
+                    badge.innerHTML = `<i data-lucide="mouse-pointer" class="w-4 h-4 text-indigo-400"></i>
+                        <span><strong>${highlightedCount}</strong> problémás szegmens kiemelve — vidd rá az egeret a magyarázatért.</span>`;
+                    visualContent.insertBefore(badge, visualContent.firstChild.nextSibling);
+                }
+
+            } else {
+                // Nincs kinyerhető szöveg (scraping blokkolva vagy régi cache)
+                const reason = !data.article_html
+                    ? 'Az oldal nem volt letölthető (védett hírportál vagy hálózati hiba).'
+                    : 'A kinyert tartalom túl rövid a megjelenítéshez.';
+                visualContent.innerHTML = `
+                    <div class="text-center py-16">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                            <i data-lucide="wifi-off" class="w-8 h-8 text-gray-400"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-700 mb-2">Vizuális nézet nem elérhető</h3>
+                        <p class="text-gray-500 max-w-sm mx-auto text-sm">${reason}</p>
+                        <p class="text-gray-400 text-xs mt-3">A "Hibák" és "Törvénytár" fülek teljes értékű elemzést mutatnak.</p>
+                    </div>`;
+            }
+
+            // ================================================================
+            // v3: ATTRIBÚCIÓS TÉRKÉP RENDERELÉSE
+            // ================================================================
+            const semanticMap = data.semantic_map;
+            const tableBody = document.getElementById('attribution-table-body');
+
+            const claimTypeLabels = {
+                'AUTHOR_VOICE':    { label: 'Szerzői hang',        bg: 'bg-red-100',    text: 'text-red-700' },
+                'DIRECT_QUOTE':    { label: 'Közvetlen idézet',    bg: 'bg-green-100',  text: 'text-green-700' },
+                'INDIRECT_QUOTE':  { label: 'Közvetett idézet',    bg: 'bg-blue-100',   text: 'text-blue-700' },
+                'FREE_INDIRECT':   { label: 'Szabad függő',        bg: 'bg-orange-100', text: 'text-orange-700' },
+                'IMPLICIT':        { label: 'Implicit',            bg: 'bg-gray-100',   text: 'text-gray-600' },
+                'UNKNOWN':         { label: 'Ismeretlen',          bg: 'bg-gray-100',   text: 'text-gray-400' }
+            };
+
+            if (semanticMap && semanticMap.attribution_map && semanticMap.attribution_map.length > 0) {
+                // Discourse subject
+                const subjEl = document.getElementById('discourse-subject');
+                if (subjEl) subjEl.textContent = semanticMap.discourse_subject || '—';
+
+                // Konfidencia label
+                const confLabel = document.getElementById('attribution-confidence-label');
+                if (confLabel && semanticMap.analysis_confidence !== undefined) {
+                    const confPct = Math.round(semanticMap.analysis_confidence * 100);
+                    confLabel.textContent = `Elemzési megbízhatóság: ${confPct}%`;
+                    confLabel.classList.remove('hidden');
+                }
+
+                // Attribúciós táblázat
+                tableBody.innerHTML = '';
+                semanticMap.attribution_map.forEach(claim => {
+                    const typeInfo = claimTypeLabels[claim.claim_type] || claimTypeLabels['UNKNOWN'];
+                    const isFid = claim.claim_type === 'FREE_INDIRECT';
+                    const responsibleBadge = claim.author_legally_responsible === true
+                        ? '<span class="text-xs font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded">IGEN</span>'
+                        : claim.author_legally_responsible === false
+                            ? '<span class="text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded">NEM</span>'
+                            : '<span class="text-xs font-bold text-yellow-700 bg-yellow-100 px-2 py-0.5 rounded">VITATOTT</span>';
+
+                    const row = document.createElement('tr');
+                    row.className = `hover:bg-gray-50 ${isFid ? 'bg-orange-50' : ''}`;
+                    row.innerHTML = `
+                        <td class="px-4 py-3">
+                            <span class="text-xs font-bold px-2 py-0.5 rounded ${typeInfo.bg} ${typeInfo.text}">${typeInfo.label}</span>
+                            ${isFid ? '<span class="block text-[10px] text-orange-600 mt-0.5">⚠ Bizonytalan!</span>' : ''}
+                        </td>
+                        <td class="px-4 py-3 text-xs text-gray-600 font-medium">${claim.speaker || '—'}</td>
+                        <td class="px-4 py-3 text-xs text-gray-500">${claim.subject || '—'}</td>
+                        <td class="px-4 py-3 text-sm text-gray-700 italic">"${(claim.claim_text || '').substring(0, 120)}${(claim.claim_text || '').length > 120 ? '…' : ''}"</td>
+                        <td class="px-4 py-3 text-xs font-mono text-purple-600">${claim.epistemic_marker || '—'}</td>
+                        <td class="px-4 py-3 text-center">${responsibleBadge}</td>`;
+                    tableBody.appendChild(row);
+                });
+
+                // Szabad függő beszéd figyelmeztetések
+                const fidCandidates = semanticMap.free_indirect_discourse_candidates || [];
+                if (fidCandidates.length > 0) {
+                    const fidContainer = document.getElementById('fid-warnings-container');
+                    const fidList = document.getElementById('fid-warnings-list');
+                    fidList.innerHTML = '';
+                    fidContainer.classList.remove('hidden');
+                    fidCandidates.forEach(fid => {
+                        const div = document.createElement('div');
+                        div.className = 'bg-orange-50 border border-orange-200 rounded-lg p-4';
+                        div.innerHTML = `
+                            <div class="flex items-start gap-3">
+                                <i data-lucide="help-circle" class="w-5 h-5 text-orange-500 shrink-0 mt-0.5"></i>
+                                <div>
+                                    <p class="text-sm italic text-orange-900 mb-1">"${fid.segment || ''}"</p>
+                                    <p class="text-xs text-orange-700">
+                                        <strong>Valószínű nyilatkozó:</strong> ${fid.likely_speaker || '?'} —
+                                        <strong>Kockázat:</strong> ${fid.risk_note || 'Bizonytalan attribúció, a szerző jogilag felelős lehet.'}
+                                    </p>
+                                </div>
+                            </div>`;
+                        fidList.appendChild(div);
+                    });
+                }
+
+                // Episztemikus jelölők összesítő (kategóriánként)
+                const epistemicSummaryEl = document.getElementById('epistemic-summary');
+                const epistemicDetailEl = document.getElementById('epistemic-markers-detail');
+                const epistemicDetailContainer = document.getElementById('epistemic-detail-list');
+                const epistemicMarkers = semanticMap.epistemic_markers || [];
+
+                const categoryCounts = { BIZONYTALAN: 0, BIZONYOS: 0, IMPLICIT_ÉRTÉKELŐ: 0, AMPLIFIKÁLÓ: 0 };
+                epistemicMarkers.forEach(m => {
+                    const cat = m.dictionary_category || m.category || 'UNKNOWN';
+                    if (categoryCounts.hasOwnProperty(cat)) categoryCounts[cat]++;
+                });
+
+                const categoryMeta = {
+                    'BIZONYTALAN':     { label: 'Bizonytalansági',  icon: 'help-circle', bgCard: 'bg-yellow-50 border-yellow-200', textCard: 'text-yellow-800' },
+                    'BIZONYOS':        { label: 'Bizonyossági',      icon: 'check-circle', bgCard: 'bg-blue-50 border-blue-200', textCard: 'text-blue-800' },
+                    'IMPLICIT_ÉRTÉKELŐ': { label: 'Implicit értékelő', icon: 'eye-off', bgCard: 'bg-orange-50 border-orange-200', textCard: 'text-orange-800' },
+                    'AMPLIFIKÁLÓ':     { label: 'Amplifikáló',       icon: 'volume-2', bgCard: 'bg-red-50 border-red-200', textCard: 'text-red-800' }
+                };
+
+                if (epistemicSummaryEl) {
+                    epistemicSummaryEl.innerHTML = Object.entries(categoryMeta).map(([key, meta]) => {
+                        const count = categoryCounts[key] || 0;
+                        return `
+                            <div class="border rounded-lg p-4 ${meta.bgCard}">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <i data-lucide="${meta.icon}" class="w-4 h-4 ${meta.textCard}"></i>
+                                    <span class="text-xs font-bold uppercase ${meta.textCard}">${meta.label}</span>
+                                </div>
+                                <p class="text-2xl font-bold ${meta.textCard}">${count}</p>
+                                <p class="text-xs opacity-60 ${meta.textCard}">${count === 0 ? 'Nem található' : 'jelölő azonosítva'}</p>
+                            </div>`;
+                    }).join('');
+                }
+
+                // Részletes jelölő lista (pill-ek)
+                if (epistemicDetailEl && epistemicMarkers.length > 0) {
+                    const colorMap = {
+                        'BIZONYTALAN': 'bg-yellow-100 text-yellow-800',
+                        'BIZONYOS': 'bg-blue-100 text-blue-800',
+                        'IMPLICIT_ÉRTÉKELŐ': 'bg-orange-100 text-orange-800',
+                        'AMPLIFIKÁLÓ': 'bg-red-100 text-red-800',
+                        'UNKNOWN': 'bg-gray-100 text-gray-600'
+                    };
+                    epistemicDetailEl.innerHTML = epistemicMarkers.map(m => {
+                        const cat = m.dictionary_category || m.category || 'UNKNOWN';
+                        const color = colorMap[cat] || colorMap['UNKNOWN'];
+                        const title = m.context ? `Kontextus: "${m.context}"` : '';
+                        return `<span class="text-xs px-2 py-0.5 rounded font-mono ${color}" title="${title}">${m.term}</span>`;
+                    }).join('');
+                    epistemicDetailContainer.classList.remove('hidden');
+                }
+
+            } else {
+                // Nincs szemantikai térkép
+                if (tableBody) {
+                    tableBody.innerHTML = `<tr><td colspan="6" class="p-10 text-center text-gray-400 italic">
+                        <i data-lucide="brain" class="w-8 h-8 mx-auto mb-2 opacity-30"></i>
+                        <p>Szemantikai elemzés nem érhető el.</p>
+                        <p class="text-xs mt-1">Phase 1 nem futott, a cikk cache-ből töltött régi verzió, vagy a Groq API nem volt elérhető.</p>
+                    </td></tr>`;
+                }
+            }
+
+            // ================================================================
+            // v3: ATTRIBÚCIÓS METAADAT – flag kártyákon belül
+            // Visszatérünk a flags listához és enricheljük az attribúciós badge-dzsel
+            // ================================================================
+            document.querySelectorAll('[data-flag-index]').forEach(card => {
+                const idx = parseInt(card.dataset.flagIndex);
+                const flag = flags[idx];
+                if (!flag || !flag.attribution_metadata) return;
+                const am = flag.attribution_metadata;
+                const claimTypeHu = {
+                    'AUTHOR_VOICE': 'Szerzői hang', 'DIRECT_QUOTE': 'Közvetlen idézet',
+                    'INDIRECT_QUOTE': 'Közvetett idézet', 'FREE_INDIRECT': 'Szabad függő',
+                    'IMPLICIT': 'Implicit', 'UNKNOWN': 'Ismeretlen'
+                };
+                const responsibleHu = { 'AUTHOR': 'Szerző', 'QUOTED_SPEAKER': 'Nyilatkozó', 'AMBIGUOUS': 'Bizonytalan' };
+                const uncertaintyHtml = (am.uncertainty_markers && am.uncertainty_markers.length > 0)
+                    ? `<span class="font-mono bg-yellow-50 text-yellow-700 px-1.5 py-0.5 rounded ml-1">⚠ ${am.uncertainty_markers.join(', ')}</span>`
+                    : '';
+                const badge = document.createElement('div');
+                badge.className = 'mt-2 flex flex-wrap items-center gap-2 text-[10px] border-t border-gray-100 pt-2';
+                badge.innerHTML = `
+                    <span class="text-gray-400">Attribúció:</span>
+                    <span class="font-mono text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded">${claimTypeHu[am.claim_type] || am.claim_type || '?'}</span>
+                    <span class="text-gray-400">Felelős:</span>
+                    <span class="font-bold ${am.responsible_party === 'AUTHOR' ? 'text-red-600' : am.responsible_party === 'AMBIGUOUS' ? 'text-yellow-600' : 'text-green-600'}">${responsibleHu[am.responsible_party] || am.responsible_party || '?'}</span>
+                    ${uncertaintyHtml}`;
+                card.querySelector('.flex-1').appendChild(badge);
+            });
+
             lucide.createIcons();
         }
 
         function setTab(tabName) {
-            ['analysis', 'rewrite', 'legal', 'visual'].forEach(t => document.getElementById('tab-' + t).classList.add('hidden'));
+            ['analysis', 'attribution', 'rewrite', 'legal', 'visual'].forEach(t => {
+                const el = document.getElementById('tab-' + t);
+                if (el) el.classList.add('hidden');
+            });
             const activeTab = document.getElementById('tab-' + tabName);
-            activeTab.classList.remove('hidden');
-            activeTab.classList.add('fade-in'); 
-            const btns = ['btn-analysis', 'btn-rewrite', 'btn-legal', 'btn-visual'];
+            if (activeTab) { activeTab.classList.remove('hidden'); activeTab.classList.add('fade-in'); }
+
+            const btns = ['btn-analysis', 'btn-attribution', 'btn-rewrite', 'btn-legal', 'btn-visual'];
             btns.forEach(b => {
-                 const btn = document.getElementById(b);
-                 btn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all bg-white text-gray-500 hover:text-gray-900 border border-transparent flex items-center gap-2";
+                const btn = document.getElementById(b);
+                if (btn) btn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all bg-white text-gray-500 hover:text-gray-900 border border-transparent flex items-center gap-2";
             });
             const activeBtn = document.getElementById('btn-' + tabName);
-            if(tabName === 'legal') activeBtn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all text-purple-700 bg-purple-50 border border-purple-200 shadow-sm flex items-center gap-2";
-            else if (tabName === 'rewrite') activeBtn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all text-green-700 bg-green-50 border border-green-200 shadow-sm flex items-center gap-2";
-            else if (tabName === 'visual') activeBtn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all text-indigo-700 bg-indigo-50 border border-indigo-200 shadow-sm flex items-center gap-2";
-            else activeBtn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all text-blue-700 bg-blue-50 border border-blue-200 shadow-sm flex items-center gap-2";
+            if (!activeBtn) return;
+            if (tabName === 'legal')         activeBtn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all text-purple-700 bg-purple-50 border border-purple-200 shadow-sm flex items-center gap-2";
+            else if (tabName === 'rewrite')  activeBtn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all text-green-700 bg-green-50 border border-green-200 shadow-sm flex items-center gap-2";
+            else if (tabName === 'visual')   activeBtn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all text-indigo-700 bg-indigo-50 border border-indigo-200 shadow-sm flex items-center gap-2";
+            else if (tabName === 'attribution') activeBtn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all text-teal-700 bg-teal-50 border border-teal-200 shadow-sm flex items-center gap-2";
+            else                             activeBtn.className = "px-5 py-2 rounded-md text-sm font-medium transition-all text-blue-700 bg-blue-50 border border-blue-200 shadow-sm flex items-center gap-2";
+
+            lucide.createIcons(); // Frissítjük az ikonokat az új tab tartalmához
         }
     </script>
 </body>

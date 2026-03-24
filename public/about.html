@@ -12,16 +12,15 @@
         .section-title { position: relative; padding-left: 1rem; }
         .section-title::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #3b82f6; border-radius: 2px; }
         .step-number { font-size: 3rem; font-weight: 800; color: #eff6ff; -webkit-text-stroke: 1px #bfdbfe; line-height: 1; margin-bottom: -0.5rem; }
-        /* Layout Fallback */
         .max-w-6xl { max-width: 72rem; }
         .mx-auto { margin-left: auto; margin-right: auto; }
         .px-4 { padding-left: 1rem; padding-right: 1rem; }
         .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .pipeline-arrow { color: #94a3b8; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body class="text-slate-800">
 
-    <!-- Navigation -->
     <nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-wrap items-center justify-between min-h-[6rem] py-4">
@@ -34,19 +33,15 @@
                         <span class="font-bold text-lg">Vissza az elemzéshez</span>
                     </a>
                 </div>
-
                 <button id="mobile-menu-btn" class="md:hidden p-2 text-slate-600 focus:outline-none ml-auto">
                     <i data-lucide="menu" class="w-8 h-8"></i>
                 </button>
-
                 <div id="mobile-menu" class="hidden w-full md:block md:w-auto mt-4 md:mt-0 basis-full md:basis-auto">
-                     <div class="flex flex-col md:flex-row md:items-center gap-4">
-                        <!-- Mobile only back button -->
+                    <div class="flex flex-col md:flex-row md:items-center gap-4">
                         <a href="index.html" class="md:hidden flex items-center gap-2 text-slate-900 hover:text-blue-600 transition-colors pb-2 border-b border-slate-100">
                             <i data-lucide="arrow-left" class="w-5 h-5"></i>
                             <span class="font-bold">Vissza az elemzéshez</span>
                         </a>
-
                         <a href="about.html" class="px-3 py-2 text-sm font-semibold text-blue-700 bg-blue-50 rounded-lg w-full md:w-auto text-center">Működés</a>
                         <a href="sources.html" class="px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors w-full md:w-auto text-center">Forrástár</a>
                     </div>
@@ -55,147 +50,350 @@
         </div>
     </nav>
     <script>
-        // Mobile menu toggle
         const menuBtn = document.getElementById('mobile-menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
-        
-        if(menuBtn && mobileMenu) {
-            menuBtn.addEventListener('click', () => {
-                mobileMenu.classList.toggle('hidden');
-            });
+        if (menuBtn && mobileMenu) {
+            menuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
         }
     </script>
 
-    <!-- Header -->
     <header class="bg-white py-16 shadow-sm">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h1 class="text-3xl md:text-5xl font-extrabold text-slate-900 mb-6">
                 Hogyan működik a <span class="text-blue-600">NewsDistill</span>?
             </h1>
             <p class="text-xl text-slate-600 max-w-2xl mx-auto">
-                A mesterséges intelligenciával támogatott, automatizált médiaauditáló rendszer dokumentációja.
+                Egy újságcikk linkjéből percek alatt átfogó jogi és etikai audit — öt mesterséges intelligencia egyidejű véleményével.
             </p>
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20">
 
         <!-- 1. Mi ez? -->
         <section>
-            <h2 class="text-2xl font-bold text-slate-900 mb-6 section-title">
-                1. Mi ez a rendszer és mi a célja?
-            </h2>
-            <div class="bg-white p-8 rounded-xl border border-slate-200 shadow-sm text-lg leading-relaxed text-slate-700">
+            <h2 class="text-2xl font-bold text-slate-900 mb-6 section-title">Mi ez a rendszer?</h2>
+            <div class="bg-white p-8 rounded-xl border border-slate-200 shadow-sm text-lg leading-relaxed text-slate-700 space-y-4">
                 <p>
-                    A <strong>NewsDistill</strong> egy mesterséges intelligenciával támogatott, automatizált médiaauditáló eszköz.
-                    Célja, hogy egy adott online hírcikket objektív, jogi és etikai szempontok alapján elemezzen, kiszűrve a szubjektivitást, 
-                    a véleményvezérlést és a potenciális törvénysértéseket.
+                    A <strong>NewsDistill</strong> egy automatizált médiaauditáló rendszer. Ha beillesztesz egy cikk linkjét,
+                    a rendszer letölti a szöveget, megérti a szerkezetét, majd egyszerre öt különböző mesterséges intelligenciával
+                    megvizsgálja, hogy a tartalom megfelel-e a romániai sajtójognak, az európai adatvédelmi előírásoknak
+                    és az újságírói etikai kódexeknek.
+                </p>
+                <p>
+                    Az eredmény nem egy AI szubjektív véleménye — hanem öt független rendszer konszenzusa,
+                    konkrét jogszabályi hivatkozásokkal alátámasztva.
                 </p>
             </div>
         </section>
 
-        <!-- 2. Technológia -->
+        <!-- 2. Pipeline -->
         <section>
-            <h2 class="text-2xl font-bold text-slate-900 mb-8 section-title">
-                2. Hogyan működik a technológia?
-            </h2>
-            <div class="grid gap-6 md:grid-cols-3">
-                <!-- Step 1 -->
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
-                    <div class="step-number">01</div>
-                    <h3 class="text-lg font-bold mb-2 relative z-10">Scraping (Letöltés)</h3>
-                    <p class="text-sm text-slate-600 relative z-10">
-                        A felhasználó által megadott URL-ről a rendszer letölti a cikk teljes szövegét, címét és metaadatait.
-                    </p>
+            <h2 class="text-2xl font-bold text-slate-900 mb-8 section-title">A három fázisú elemzési pipeline</h2>
+            <p class="text-slate-600 mb-8">Az elemzés nem egyetlen lépés — hanem egy gondosan megtervezett, háromfázisú folyamat, ahol minden lépés az előző eredményére épít.</p>
+
+            <!-- Phase 0: Scraping -->
+            <div class="grid md:grid-cols-[1fr_auto_1fr_auto_1fr] gap-4 items-start mb-8">
+
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="bg-slate-700 px-5 py-3 flex items-center gap-3">
+                        <span class="text-white font-black text-xl">0</span>
+                        <h3 class="text-white font-bold">Letöltés & Tisztítás</h3>
+                    </div>
+                    <div class="p-5 space-y-3">
+                        <p class="text-sm text-slate-600">A rendszer letölti a cikk HTML tartalmát, majd egy „whitelist" alapú szűrővel kiszedi belőle a valódi szöveget — eltávolítva a reklámokat, menüket, kapcsolódó linkeket.</p>
+                        <div class="flex flex-wrap gap-2 pt-1">
+                            <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">axios</span>
+                            <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">cheerio</span>
+                        </div>
+                        <p class="text-xs text-slate-400 pt-1">~2 másodperc</p>
+                    </div>
                 </div>
-                <!-- Step 2 -->
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
-                    <div class="step-number">02</div>
-                    <h3 class="text-lg font-bold mb-2 relative z-10">Tisztítás</h3>
-                    <p class="text-sm text-slate-600 relative z-10">
-                        Eltávolítja a reklámokat, menüket és egyéb zavaró elemeket, hogy csak a tiszta tartalom maradjon az elemzéshez.
-                    </p>
+
+                <div class="pipeline-arrow hidden md:flex pt-16">→</div>
+
+                <!-- Phase 1 -->
+                <div class="bg-white rounded-xl border-2 border-teal-400 shadow-sm overflow-hidden">
+                    <div class="bg-teal-600 px-5 py-3 flex items-center gap-3">
+                        <span class="text-white font-black text-xl">1</span>
+                        <h3 class="text-white font-bold">Szemantikai feltérképezés</h3>
+                        <span class="ml-auto text-xs bg-teal-500 text-white px-2 py-0.5 rounded font-bold">ÚJ</span>
+                    </div>
+                    <div class="p-5 space-y-3">
+                        <p class="text-sm text-slate-600">
+                            <strong>Mielőtt</strong> jogilag ítélkeznénk a cikkről, először megértjük a szerkezetét.
+                            Egy gyors AI-modell feltérképezi: <em>ki mondja minek kinek?</em>
+                        </p>
+                        <ul class="text-sm text-slate-600 space-y-1">
+                            <li class="flex items-start gap-2"><i data-lucide="user" class="w-4 h-4 text-teal-500 shrink-0 mt-0.5"></i> Ki a cikk elsődleges alanya?</li>
+                            <li class="flex items-start gap-2"><i data-lucide="git-branch" class="w-4 h-4 text-teal-500 shrink-0 mt-0.5"></i> Ki mondja az egyes állításokat — a szerző, vagy egy idézett forrás?</li>
+                            <li class="flex items-start gap-2"><i data-lucide="alert-triangle" class="w-4 h-4 text-orange-400 shrink-0 mt-0.5"></i> Vannak-e „szabad függő" mondatok, ahol bizonytalan a felelősség?</li>
+                            <li class="flex items-start gap-2"><i data-lucide="tag" class="w-4 h-4 text-teal-500 shrink-0 mt-0.5"></i> Milyen episztemikus jelölők találhatók? (állítólag, nyilván, elismerte...)</li>
+                        </ul>
+                        <div class="flex flex-wrap gap-2 pt-1">
+                            <span class="text-xs bg-teal-50 text-teal-700 px-2 py-0.5 rounded font-mono">Groq / Llama 3.3</span>
+                        </div>
+                        <p class="text-xs text-slate-400 pt-1">~3 másodperc</p>
+                    </div>
                 </div>
-                <!-- Step 3 -->
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden border-l-4 border-l-blue-500">
-                    <div class="step-number text-blue-100 -webkit-text-stroke-blue-200">03</div>
-                    <h3 class="text-lg font-bold mb-2 relative z-10 text-blue-900">Multi-AI Consensus</h3>
-                    <p class="text-sm text-slate-600 relative z-10">
-                        A feladatot párhuzamosan elküldi több különböző AI motornak (Gemini, Groq, Mistral, OpenAI). 
-                        Ha az egyik tévedne, a többiek eredménye korrigálja azt.
-                    </p>
+
+                <div class="pipeline-arrow hidden md:flex pt-16">→</div>
+
+                <!-- Phase 2 -->
+                <div class="bg-white rounded-xl border-2 border-blue-400 shadow-sm overflow-hidden">
+                    <div class="bg-blue-600 px-5 py-3 flex items-center gap-3">
+                        <span class="text-white font-black text-xl">2</span>
+                        <h3 class="text-white font-bold">Jogi & etikai audit</h3>
+                    </div>
+                    <div class="p-5 space-y-3">
+                        <p class="text-sm text-slate-600">
+                            Most, hogy tudja <em>ki felelős miért</em>, öt AI-modell párhuzamosan elvégzi a tényleges jogi elemzést — a szemantikai térkép alapján.
+                            Nem össze fogja keverni a szerző hangját az idézett politikuséval.
+                        </p>
+                        <div class="flex flex-wrap gap-2 pt-1">
+                            <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-mono">Gemini Flash</span>
+                            <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-mono">Groq</span>
+                            <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-mono">Mistral</span>
+                            <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-mono">GPT-4o</span>
+                            <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-mono">Grok</span>
+                        </div>
+                        <p class="text-xs text-slate-400 pt-1">~10 másodperc (párhuzamosan)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Összesítés -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 flex gap-4 items-start">
+                <div class="bg-blue-100 p-2 rounded-lg shrink-0"><i data-lucide="layers" class="w-6 h-6 text-blue-600"></i></div>
+                <div>
+                    <h3 class="font-bold text-blue-900 mb-1">Összesítés & Konszenzus</h3>
+                    <p class="text-sm text-blue-800">Az öt modell eredménye összefésülődik: az objektivitási pontszám átlaga, a legmagasabb kockázati szint kerül a főeredménybe, és ha az AI-k egymással is vitatkoznak, azt <strong>Kisebbségi Jelentésként</strong> külön megjelöljük.</p>
                 </div>
             </div>
         </section>
 
-        <!-- 3. Objektivitás -->
+        <!-- 3. Az attribúciós probléma -->
         <section>
-            <h2 class="text-2xl font-bold text-slate-900 mb-6 section-title">
-                3. Miért nem részrehajló? (Objektivitás-garancia)
-            </h2>
+            <h2 class="text-2xl font-bold text-slate-900 mb-6 section-title">Az attribúció kihívása — és hogyan oldjuk meg</h2>
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-6 border-b border-slate-100">
+                    <p class="text-slate-700 leading-relaxed">
+                        Az újságírói szövegekben az egyik legnagyobb jogi kockázat, hogy <strong>nem mindig egyértelmű, ki felelős egy-egy állításért.</strong>
+                        Vegyük ezt a mondatot:
+                    </p>
+                    <div class="bg-slate-50 border-l-4 border-slate-300 p-4 my-4 italic text-slate-700">
+                        „Az ellenzéki képviselő szerint Kovács polgármester elcsalta a közbeszerzési pályázatot. Nyilván mindenki tudja, hogy ez már régóta így megy."
+                    </div>
+                    <p class="text-slate-700">Az első mondat idézet — a képviselő állítása, nem a szerzőé. A második mondat azonban a <strong>szerző rejtett véleménye</strong>, tényként tálalva. Egy egyszerű AI össze fogja keverni a kettőt.</p>
+                </div>
+                <div class="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-100">
+                    <div class="p-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xs font-bold px-2 py-0.5 rounded bg-green-100 text-green-700">Közvetlen idézet</span>
+                        </div>
+                        <p class="text-sm text-slate-600">A szerző szó szerint idéz valakit, idézőjelben. A jogi felelősség elsősorban a nyilatkozónál van — bár a szerző döntése, hogy közölte-e.</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700">Közvetett idézet</span>
+                        </div>
+                        <p class="text-sm text-slate-600">„X szerint..." — a szerző átfogalmazza a forrást. Ha bizonytalansági jelölő van benne (állítólag, úgy tudni), a szerző részben distanciálta magát.</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xs font-bold px-2 py-0.5 rounded bg-orange-100 text-orange-700">Szabad függő</span>
+                        </div>
+                        <p class="text-sm text-slate-600">A legveszélyesebb kategória. Nincs explicit „mondta" — a szerző és az alany hangja összemosódik. A NewsDistill ezeket külön jelöli és figyelmeztet.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Episztemikus jelölők -->
+        <section>
+            <h2 class="text-2xl font-bold text-slate-900 mb-6 section-title">Episztemikus jelölők — a rejtett szerzői hang detektálása</h2>
+            <p class="text-slate-600 mb-6">A NewsDistill 159 magyar szót és kifejezést ismer fel, amelyek elárulják a szerző valódi viszonyát az állításhoz.</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-5">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i data-lucide="help-circle" class="w-5 h-5 text-yellow-600"></i>
+                        <h3 class="font-bold text-yellow-800">Bizonytalansági</h3>
+                    </div>
+                    <p class="text-xs text-yellow-700 mb-3">A szerző distanciálja magát az állítástól — csökkenti, de nem szünteti meg a felelősséget.</p>
+                    <div class="flex flex-wrap gap-1">
+                        <span class="text-[11px] font-mono bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded">állítólag</span>
+                        <span class="text-[11px] font-mono bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded">úgy tudni</span>
+                        <span class="text-[11px] font-mono bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded">forrásaink szerint</span>
+                    </div>
+                </div>
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-5">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i data-lucide="check-circle" class="w-5 h-5 text-blue-600"></i>
+                        <h3 class="font-bold text-blue-800">Bizonyossági</h3>
+                    </div>
+                    <p class="text-xs text-blue-700 mb-3">A szerző tényként kezeli az állítást — a legmagasabb jogi mérce alkalmazandó.</p>
+                    <div class="flex flex-wrap gap-1">
+                        <span class="text-[11px] font-mono bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">elismerte</span>
+                        <span class="text-[11px] font-mono bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">jogerősen</span>
+                        <span class="text-[11px] font-mono bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">bizonyítottan</span>
+                    </div>
+                </div>
+                <div class="bg-orange-50 border border-orange-200 rounded-xl p-5">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i data-lucide="eye-off" class="w-5 h-5 text-orange-600"></i>
+                        <h3 class="font-bold text-orange-800">Implicit értékelő</h3>
+                    </div>
+                    <p class="text-xs text-orange-700 mb-3">A legveszélyesebb kategória — a szerző saját ítéletét tényként csomagolja be.</p>
+                    <div class="flex flex-wrap gap-1">
+                        <span class="text-[11px] font-mono bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded">nyilván</span>
+                        <span class="text-[11px] font-mono bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded">természetesen</span>
+                        <span class="text-[11px] font-mono bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded">köztudomású</span>
+                    </div>
+                </div>
+                <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i data-lucide="volume-2" class="w-5 h-5 text-red-600"></i>
+                        <h3 class="font-bold text-red-800">Amplifikáló</h3>
+                    </div>
+                    <p class="text-xs text-red-700 mb-3">Narratív eszkaláció — felerősíti az állítást, negatív konnotációt ad hozzá.</p>
+                    <div class="flex flex-wrap gap-1">
+                        <span class="text-[11px] font-mono bg-red-100 text-red-800 px-1.5 py-0.5 rounded">sőt</span>
+                        <span class="text-[11px] font-mono bg-red-100 text-red-800 px-1.5 py-0.5 rounded">ráadásul</span>
+                        <span class="text-[11px] font-mono bg-red-100 text-red-800 px-1.5 py-0.5 rounded">botrányos</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. Eredmény dashboard -->
+        <section>
+            <h2 class="text-2xl font-bold text-slate-900 mb-6 section-title">Mit mutat az eredmény?</h2>
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-100">
+                    <div class="p-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="bg-red-100 p-1.5 rounded"><i data-lucide="alert-triangle" class="w-4 h-4 text-red-600"></i></div>
+                            <h3 class="font-bold text-slate-800">Hibák & Jelzések</h3>
+                        </div>
+                        <p class="text-sm text-slate-600">Minden azonosított jogsértés vagy etikai probléma kártya formájában jelenik meg, a pontos jogszabályi hivatkozással és a problémás idézettel.</p>
+                    </div>
+                    <div class="p-6 bg-teal-50">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="bg-teal-100 p-1.5 rounded"><i data-lucide="git-branch" class="w-4 h-4 text-teal-600"></i></div>
+                            <h3 class="font-bold text-teal-800">Attribúciós térkép <span class="text-xs font-bold bg-teal-200 text-teal-700 px-1.5 py-0.5 rounded ml-1">ÚJ</span></h3>
+                        </div>
+                        <p class="text-sm text-slate-600">Táblázatban látható, hogy a cikk egyes állításait ki tette — a szerző, egy névvel megjelölt forrás, vagy egy névtelen informátor —, és hogy ki viseli az jogi felelősséget.</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="bg-purple-100 p-1.5 rounded"><i data-lucide="brain-circuit" class="w-4 h-4 text-purple-600"></i></div>
+                            <h3 class="font-bold text-slate-800">Rejtett jelentés</h3>
+                        </div>
+                        <p class="text-sm text-slate-600">Ha a cikk szarkazmust, iróniát vagy „dog whistle"-t (kódolt politikai üzenetet) tartalmaz, azt a rendszer külön kiemelve jelzi.</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="bg-yellow-100 p-1.5 rounded"><i data-lucide="scale" class="w-4 h-4 text-yellow-600"></i></div>
+                            <h3 class="font-bold text-slate-800">Törvénytár</h3>
+                        </div>
+                        <p class="text-sm text-slate-600">Csak a tényleges törvénysértések – hivatkozva a pontos cikkelyre (pl. Codul Civil Art. 72) és linkelve a hivatalos jogszabályi forrásra.</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="bg-green-100 p-1.5 rounded"><i data-lucide="wand-2" class="w-4 h-4 text-green-600"></i></div>
+                            <h3 class="font-bold text-slate-800">Semlegesített verzió</h3>
+                        </div>
+                        <p class="text-sm text-slate-600">Az AI átírja a cikket úgy, hogy jogilag és etikailag megfelelő legyen — megtartva az eredeti információt, de eltávolítva a problémás elemeket.</p>
+                    </div>
+                    <div class="p-6 bg-slate-50">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="bg-slate-200 p-1.5 rounded"><i data-lucide="brain" class="w-4 h-4 text-slate-600"></i></div>
+                            <h3 class="font-bold text-slate-800">Elemzési megbízhatóság <span class="text-xs font-bold bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded ml-1">ÚJ</span></h3>
+                        </div>
+                        <p class="text-sm text-slate-600">A rendszer őszintén jelzi, ha az elemzés korlátozott — például ha a cikk tele van bizonytalan attribúciójú mondatokkal, vagy ha a scraping csak részleges szöveget kapott.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. Objektivitás -->
+        <section>
+            <h2 class="text-2xl font-bold text-slate-900 mb-6 section-title">Miért nem részrehajló?</h2>
             <div class="space-y-4">
                 <div class="flex gap-4 items-start bg-slate-50 p-6 rounded-lg">
-                    <div class="bg-blue-100 p-2 rounded text-blue-600"><i data-lucide="thermometer" class="w-6 h-6"></i></div>
+                    <div class="bg-blue-100 p-2 rounded shrink-0 text-blue-600"><i data-lucide="thermometer" class="w-6 h-6"></i></div>
                     <div>
-                        <h3 class="font-bold text-slate-900">"Zero-Temperature" beállítás</h3>
-                        <p class="text-slate-600 text-sm mt-1">Az AI modellek "temperature" paramétere 0.1-re van állítva. Ez azt jelenti, hogy a "kreativitás" ki van kapcsolva. A modell nem fantáziálhat, csak a tényekre támaszkodhat.</p>
+                        <h3 class="font-bold text-slate-900">Alacsony hőmérséklet, nulla kreativitás</h3>
+                        <p class="text-slate-600 text-sm mt-1">A szemantikai kinyerő (Phase 1) pontosan 0.0-s hőmérsékleten fut — nincs véletlenszerűség, nincs "fantázia". A jogi audit modellek is 0.1-es értéken dolgoznak, ami kizárja a szabad asszociációt.</p>
                     </div>
                 </div>
                 <div class="flex gap-4 items-start bg-slate-50 p-6 rounded-lg">
-                    <div class="bg-purple-100 p-2 rounded text-purple-600"><i data-lucide="book-lock" class="w-6 h-6"></i></div>
+                    <div class="bg-purple-100 p-2 rounded shrink-0 text-purple-600"><i data-lucide="book-lock" class="w-6 h-6"></i></div>
                     <div>
-                        <h3 class="font-bold text-slate-900">Kötött szabályrendszer</h3>
-                        <p class="text-slate-600 text-sm mt-1">A prompt nem véleményt kér, hanem logikai feladatot ad: "Keresd meg, melyik mondat sérti a Codul Civil 72. cikkelyét". Ez ténykérdés, nem ízlés dolga.</p>
+                        <h3 class="font-bold text-slate-900">Kötött szabályrendszer — nem vélemény, hanem ténykérdés</h3>
+                        <p class="text-slate-600 text-sm mt-1">Az AI nem azt kérdezzük, hogy "jó-e ez a cikk", hanem: "Tartalmaz-e az ártatlanság vélelmét sértő állítást jogerős ítélet nélkül?" Ez logikai feladat, nem ízlés dolga.</p>
                     </div>
                 </div>
                 <div class="flex gap-4 items-start bg-slate-50 p-6 rounded-lg">
-                    <div class="bg-green-100 p-2 rounded text-green-600"><i data-lucide="code-2" class="w-6 h-6"></i></div>
+                    <div class="bg-teal-100 p-2 rounded shrink-0 text-teal-600"><i data-lucide="users" class="w-6 h-6"></i></div>
                     <div>
-                        <h3 class="font-bold text-slate-900">Nyílt forráskód</h3>
-                        <p class="text-slate-600 text-sm mt-1">
-                            A rendszer átlátható. A forráskód és a szabálymátrix (`legal_matrix.json`) nyilvános.
-                            <a href="https://github.com/LemonScripter/newsdistill" target="_blank" class="text-blue-600 hover:underline font-mono ml-1">GitHub Repository &rarr;</a>
-                        </p>
+                        <h3 class="font-bold text-slate-900">Öt egymástól független AI — konszenzus alapú döntés</h3>
+                        <p class="text-slate-600 text-sm mt-1">Különböző cégek, különböző architektúrák, különböző tanítási adatokkal. Ha az öt modell közül csak egy jelez problémát, az „Kisebbségi Jelentésként" jelenik meg — nem söprik a szőnyeg alá.</p>
+                    </div>
+                </div>
+                <div class="flex gap-4 items-start bg-slate-50 p-6 rounded-lg">
+                    <div class="bg-green-100 p-2 rounded shrink-0 text-green-600"><i data-lucide="code-2" class="w-6 h-6"></i></div>
+                    <div>
+                        <h3 class="font-bold text-slate-900">Átlátható szabálymátrix</h3>
+                        <p class="text-slate-600 text-sm mt-1">A rendszer által alkalmazott összes jogi és etikai szabály egy nyílt <span class="font-mono text-xs bg-slate-100 px-1 rounded">legal_matrix.json</span> fájlban van rögzítve. Bárki ellenőrizheti, mit és miért keres a rendszer.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 4. Transzparencia -->
+        <!-- 7. Korlátok -->
         <section>
-            <h2 class="text-2xl font-bold text-slate-900 mb-6 section-title">
-                4. Hogyan ellenőrizheted Te is?
-            </h2>
-            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
-                <div class="p-6 border-b border-slate-100 flex items-center gap-3">
-                    <i data-lucide="eye" class="w-5 h-5 text-blue-500"></i>
-                    <span class="font-medium">Az ellenőrzés eszközei a Vezérlőpulton:</span>
+            <h2 class="text-2xl font-bold text-slate-900 mb-6 section-title">Ismert korlátok</h2>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div class="bg-white border border-slate-200 rounded-xl p-5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="wifi-off" class="w-4 h-4 text-slate-400"></i>
+                        <h3 class="font-semibold text-slate-700">Scraping-korlátok</h3>
+                    </div>
+                    <p class="text-sm text-slate-500">Egyes újságoldalak (pl. Telex, BBC) blokkolják az automatikus letöltést. Ilyenkor a rendszer nem tud hozzáférni a teljes szöveghez.</p>
                 </div>
-                <div class="p-6 grid md:grid-cols-2 gap-8">
-                    <div>
-                        <h4 class="font-bold text-slate-800 mb-2">Törvénytár fül</h4>
-                        <p class="text-sm text-slate-600">
-                            Megtalálod az összes hivatkozott jogszabály pontos szövegét és linkjét a hivatalos állami oldalakra (just.ro, eur-lex).
-                        </p>
+                <div class="bg-white border border-slate-200 rounded-xl p-5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="clock" class="w-4 h-4 text-slate-400"></i>
+                        <h3 class="font-semibold text-slate-700">Napi elemzési limit</h3>
                     </div>
-                    <div>
-                        <h4 class="font-bold text-slate-800 mb-2">Eredeti vs. Javított</h4>
-                        <p class="text-sm text-slate-600">
-                            Összehasonlíthatod a hibásnak jelölt mondatot a rendszer által javasolt semleges verzióval, így láthatod a különbséget.
-                        </p>
+                    <p class="text-sm text-slate-500">Biztonsági és költségkontroll okokból naponta legfeljebb 15 új cikket elemez a rendszer. A már elemzett cikkek 30 napig cache-ből töltődnek — ingyenesen és korlátlanul.</p>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="help-circle" class="w-4 h-4 text-slate-400"></i>
+                        <h3 class="font-semibold text-slate-700">Szabad függő beszéd</h3>
                     </div>
+                    <p class="text-sm text-slate-500">Azok a mondatok, ahol a szerző és az alany hangja összemosódik, még a legjobb AI számára is kihívást jelentenek. Ezeket a rendszer jelöli, de nem ítéli meg biztosan.</p>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="gavel" class="w-4 h-4 text-slate-400"></i>
+                        <h3 class="font-semibold text-slate-700">Nem jogi tanácsadás</h3>
+                    </div>
+                    <p class="text-sm text-slate-500">A NewsDistill döntéstámogató eszköz. Eredményei nem helyettesítik ügyvéd véleményét — jogvita esetén mindig konzultáljon szakemberrel.</p>
                 </div>
             </div>
         </section>
 
-        <!-- 5. Disclaimer -->
+        <!-- Disclaimer -->
         <section class="bg-amber-50 border-l-4 border-amber-400 p-6 rounded-r-lg">
             <div class="flex gap-4">
                 <div class="shrink-0"><i data-lucide="alert-triangle" class="w-6 h-6 text-amber-600"></i></div>
                 <div>
                     <h3 class="font-bold text-amber-900 mb-1">Felelősségkizárás</h3>
                     <p class="text-sm text-amber-800">
-                        A NewsDistill egy döntéstámogató eszköz. Bár a legmodernebb technológiát és hivatalos jogi adatbázisokat használ, 
+                        A NewsDistill egy döntéstámogató eszköz. Bár a legmodernebb technológiát és hivatalos jogi adatbázisokat használja,
                         az eredményei nem minősülnek jogi tanácsadásnak. Egy esetleges jogvita során mindig konzultáljon ügyvéddel!
                     </p>
                 </div>

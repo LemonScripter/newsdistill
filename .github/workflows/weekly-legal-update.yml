@@ -1,0 +1,67 @@
+name: Heti jogtár frissítés
+
+on:
+  schedule:
+    - cron: '0 5 * * 1'  # Minden hétfőn 5:00 UTC (7:00 közép-európai idő)
+  workflow_dispatch:       # Manuálisan is indítható a GitHub Actions felületéről
+
+permissions:
+  contents: write
+
+jobs:
+  update-legal-date:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Kód checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Node.js beállítása
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: last_verified dátum frissítése
+        run: |
+          TODAY=$(date +%Y-%m-%d)
+          echo "Frissítés dátuma: $TODAY"
+
+          # Behelyettesítjük a dátumot a legal_matrix.json-ban
+          node -e "
+            const fs = require('fs');
+            const path = 'data/legal_matrix.json';
+            const data = JSON.parse(fs.readFileSync(path, 'utf8'));
+            const meta = data.find(r => r.id === 'META_INFO');
+            if (meta) {
+              meta.last_verified = process.env.TODAY;
+              console.log('last_verified frissítve:', process.env.TODAY);
+            }
+            fs.writeFileSync(path, JSON.stringify(data, null, 2) + '\n');
+          " TODAY="$TODAY"
+
+      - name: Változások ellenőrzése
+        id: check_changes
+        run: |
+          git diff --quiet data/legal_matrix.json && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit és push (ha változott)
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config user.name "NewsDistill Bot"
+          git config user.email "newsdistill-bot@users.noreply.github.com"
+          git add data/legal_matrix.json
+          git commit -m "chore: heti jogtár ellenőrzés – $(date +%Y-%m-%d)
+
+          Automatikus heti frissítés: a jogi adatbázis aktuális állapotának jelzése.
+          A szabályok tartalma manuális jogi felülvizsgálatot igényel változás esetén."
+          git push
+
+      - name: Összefoglaló
+        run: |
+          if [ "${{ steps.check_changes.outputs.changed }}" == "true" ]; then
+            echo "✅ Jogtár dátuma sikeresen frissítve: $(date +%Y-%m-%d)"
+          else
+            echo "ℹ️ Nem volt változás (dátum már aktuális)."
+          fi
