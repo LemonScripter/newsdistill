@@ -307,16 +307,89 @@
                     </div>
                     <div class="p-6 bg-slate-50">
                         <div class="flex items-center gap-2 mb-3">
-                            <div class="bg-slate-200 p-1.5 rounded"><i data-lucide="brain" class="w-4 h-4 text-slate-600"></i></div>
-                            <h3 class="font-bold text-slate-800">Elemzési megbízhatóság <span class="text-xs font-bold bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded ml-1">ÚJ</span></h3>
+                            <div class="bg-slate-200 p-1.5 rounded"><i data-lucide="gauge" class="w-4 h-4 text-slate-600"></i></div>
+                            <h3 class="font-bold text-slate-800">Szemantikai konfidencia <span class="text-xs font-bold bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded ml-1">ÚJ</span></h3>
                         </div>
-                        <p class="text-sm text-slate-600">A rendszer őszintén jelzi, ha az elemzés korlátozott — például ha a cikk tele van bizonytalan attribúciójú mondatokkal, vagy ha a scraping csak részleges szöveget kapott.</p>
+                        <p class="text-sm text-slate-600">Nem az AI mondja meg, hogy mennyire bízik magában — mert az mindig 70%-ot mondott. A konfidenciát egy <strong>AI-tól független, determinisztikus algoritmus</strong> számolja, 8 objektív tényező alapján.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 6. Objektivitás -->
+        <!-- 6. Deterministikus konfidencia -->
+        <section>
+            <h2 class="text-2xl font-bold text-slate-900 mb-6 section-title">Hogyan számolódik a szemantikai konfidencia?</h2>
+            <p class="text-slate-600 mb-6">A konfidencia-pontszám azt jelzi, mennyire megbízható az elemzés alapja — azaz mennyire érthetőek és egyértelműek a cikk állításainak forrásai. Az AI ezt korábban maga értékelte, és mindig ~70%-ot adott, függetlenül a cikk tényleges minőségétől (<em>anchoring bias</em>). Mostantól ez a szám nem becslés, hanem <strong>kiszámított érték</strong>.</p>
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="bg-slate-700 px-6 py-4 flex items-center gap-3">
+                    <i data-lucide="function-square" class="w-5 h-5 text-white"></i>
+                    <span class="text-white font-bold">Alap: 100% — levonások és bónusz</span>
+                </div>
+                <div class="divide-y divide-slate-100">
+                    <div class="grid md:grid-cols-[2fr_1fr] gap-4 px-6 py-4 items-center">
+                        <div>
+                            <span class="font-semibold text-slate-800">Szabad függő (FID) mondatok</span>
+                            <p class="text-sm text-slate-500 mt-0.5">Ha bizonytalan, hogy a szerző vagy az alany mondja az állítást — ez a legveszélyesebb kategória.</p>
+                        </div>
+                        <div class="text-right font-mono text-red-600 font-bold">−8% / db (max −24%)</div>
+                    </div>
+                    <div class="grid md:grid-cols-[2fr_1fr] gap-4 px-6 py-4 items-center">
+                        <div>
+                            <span class="font-semibold text-slate-800">UNKNOWN forrású állítások aránya</span>
+                            <p class="text-sm text-slate-500 mt-0.5">Ha az AI nem tudja meghatározni, ki tett egy állítást.</p>
+                        </div>
+                        <div class="text-right font-mono text-red-600 font-bold">max −30%</div>
+                    </div>
+                    <div class="grid md:grid-cols-[2fr_1fr] gap-4 px-6 py-4 items-center">
+                        <div>
+                            <span class="font-semibold text-slate-800">Bizonytalan felelősségű állítások aránya</span>
+                            <p class="text-sm text-slate-500 mt-0.5">Olyan mondatok, ahol a felelősség létezik, de nem egyértelmű.</p>
+                        </div>
+                        <div class="text-right font-mono text-orange-600 font-bold">max −20%</div>
+                    </div>
+                    <div class="grid md:grid-cols-[2fr_1fr] gap-4 px-6 py-4 items-center">
+                        <div>
+                            <span class="font-semibold text-slate-800">Hiányzó diskurzus-alany</span>
+                            <p class="text-sm text-slate-500 mt-0.5">Ha a cikknek nincs azonosított elsődleges alanya (kiről szól a cikk?).</p>
+                        </div>
+                        <div class="text-right font-mono text-orange-600 font-bold">−10%</div>
+                    </div>
+                    <div class="grid md:grid-cols-[2fr_1fr] gap-4 px-6 py-4 items-center">
+                        <div>
+                            <span class="font-semibold text-slate-800">Kevés attribúció hosszú szövegben</span>
+                            <p class="text-sm text-slate-500 mt-0.5">Ha 1500 karakternél hosszabb cikkben 3-nál kevesebb attribúció van — gyanúsan sok a forrás nélküli állítás.</p>
+                        </div>
+                        <div class="text-right font-mono text-orange-600 font-bold">−20%</div>
+                    </div>
+                    <div class="grid md:grid-cols-[2fr_1fr] gap-4 px-6 py-4 items-center">
+                        <div>
+                            <span class="font-semibold text-slate-800">Implicit értékelő jelölők</span>
+                            <p class="text-sm text-slate-500 mt-0.5">„Nyilván", „természetesen", „köztudomású" — a szerző véleménye tényként álcázva.</p>
+                        </div>
+                        <div class="text-right font-mono text-orange-600 font-bold">−3% / db (max −15%)</div>
+                    </div>
+                    <div class="grid md:grid-cols-[2fr_1fr] gap-4 px-6 py-4 items-center">
+                        <div>
+                            <span class="font-semibold text-slate-800">Amplifikáló jelölők</span>
+                            <p class="text-sm text-slate-500 mt-0.5">„Sőt", „ráadásul", „botrányos" — narratív eszkaláció, felerősített negatív konnotáció.</p>
+                        </div>
+                        <div class="text-right font-mono text-yellow-600 font-bold">−2% / db (max −10%)</div>
+                    </div>
+                    <div class="grid md:grid-cols-[2fr_1fr] gap-4 px-6 py-4 items-center bg-green-50">
+                        <div>
+                            <span class="font-semibold text-green-800">Bónusz: sok, jól attribuált állítás</span>
+                            <p class="text-sm text-green-600 mt-0.5">Ha a cikkben 10 vagy több azonosított forrású attribúció van — a szöveg átláthatóan dokumentált.</p>
+                        </div>
+                        <div class="text-right font-mono text-green-600 font-bold">+5%</div>
+                    </div>
+                </div>
+                <div class="bg-slate-50 px-6 py-4 border-t border-slate-200">
+                    <p class="text-sm text-slate-500">Az eredmény 10–100% között mozog. Az alacsony érték nem azt jelenti, hogy a cikk rossz — azt jelenti, hogy az elemzés alapja bizonytalan, és az AI-nak is nehezebb volt egyértelműen dönteni.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. Objektivitás -->
         <section>
             <h2 class="text-2xl font-bold text-slate-900 mb-6 section-title">Miért nem részrehajló?</h2>
             <div class="space-y-4">
